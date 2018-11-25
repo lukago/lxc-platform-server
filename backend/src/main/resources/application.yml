@@ -1,8 +1,38 @@
-spring.devtools.livereload.enabled: false
-
----
 spring:
-    profiles: production
+  profiles:
+    active: dev
+  application:
+    name: lxc
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        hbm2ddl.auto: update
+        ejb.naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
+        show_sql: true
+        format_sql: true
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:5432/lxcdb
+    username: test
+    password: passwd
+    driverClassName: org.postgresql.Driver
 
-spring.profiles.active: redis
+server:
+  port: 8080
 
+logging:
+  level:
+    org.springframework.web: WARN
+    org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: ERROR
+
+security:
+  jwt:
+    token:
+      secret-key: secret-key
+      expire-length: 36000

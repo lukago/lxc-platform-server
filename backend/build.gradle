@@ -31,20 +31,42 @@ repositories {
 }
 
 dependencies {
-  compile 'org.springframework.boot:spring-boot-devtools'
   compile 'org.springframework.boot:spring-boot-starter-web'
-  compile 'org.zeroturnaround:zt-exec:1.9'
+
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.1.0.RELEASE'
 
   compile 'org.springframework.boot:spring-boot-starter-security'
-  compile group: 'org.springframework.session', name: 'spring-session', version: '1.0.0.RELEASE'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-redis', version: '1.4.7.RELEASE'
+
+
+  compile 'org.springframework.boot:spring-boot-devtools'
+
+  // https://mvnrepository.com/artifact/io.springfox/springfox-swagger2
+  compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+
+  // https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui
+  compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+
+  // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
+  compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+
+  // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+  compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.1'
+
+  // https://mvnrepository.com/artifact/org.postgresql/postgresql
+  compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
+
+  compile 'org.zeroturnaround:zt-exec:1.9'
+
+  // https://mvnrepository.com/artifact/com.google.guava/guava
+  compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
+
 
   testCompile 'org.springframework.boot:spring-boot-starter-test'
   testCompile 'org.springframework.security:spring-security-test'
   testCompile group: 'org.spockframework', name: 'spock-core', version: '1.2-groovy-2.5'
   testCompile 'com.geowarin:spring-spock-mvc:0.2.1'
 }
-
 
 eclipse {
   classpath {
@@ -67,7 +89,7 @@ task buildDocker(type: Docker) {
   tag = 'geowarin/boot-react'
   addFile {
     from jar
-    rename {'app.jar'}
+    rename { 'app.jar' }
   }
   entryPoint(['java', '-Djava.security.egd=file:/dev/./urandom', '-jar', '/app.jar'])
   exposePort(8080)

@@ -1,30 +1,75 @@
 package react.model;
 
-import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.Size;
+import java.util.List;
 
-public class User implements Serializable {
-  private String userName;
-  private String token;
-  private boolean authenticated;
+@Entity
+@Table(name="Users")
+public class User {
 
-  public User() {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  List<Role> roles;
+
+  @Size(min = 4, max = 255, message = "Minimum username length: 4 characters")
+  @Column(unique = true, nullable = false)
+  private String username;
+
+  @Column(unique = true, nullable = false)
+  private String email;
+
+  @Size(min = 8, message = "Minimum password length: 8 characters")
+  private String password;
+
+  public Integer getId() {
+    return id;
   }
 
-  public User(String userName, String token, boolean authenticated) {
-    this.userName = userName;
-    this.token = token;
-    this.authenticated = authenticated;
+  public void setId(Integer id) {
+    this.id = id;
   }
 
-  public String getUserName() {
-    return userName;
+  public String getUsername() {
+    return username;
   }
 
-  public String getToken() {
-    return token;
+  public void setUsername(String username) {
+    this.username = username;
   }
 
-  public boolean isAuthenticated() {
-    return authenticated;
+  public String getEmail() {
+    return email;
   }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public List<Role> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(List<Role> roles) {
+    this.roles = roles;
+  }
+
 }
