@@ -1,8 +1,8 @@
 import counterpart from 'counterpart';
-import {setLocale} from 'reducers/locale';
+import {setLocale} from '../reducers/locale';
 const translations = {
-  en: require('lang/en.json'),
-  fr: require('lang/fr.json')
+  en: require('../../assets/lang/en.json'),
+  fr: require('../../assets/lang/fr.json')
 };
 
 const locales = Object.keys(translations);

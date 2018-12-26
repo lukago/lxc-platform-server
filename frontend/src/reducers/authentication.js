@@ -1,5 +1,3 @@
-import { browserHistory } from 'react-router';
-
 const LOGIN = 'authentication/LOGIN';
 const LOGIN_SUCCESS = 'authentication/LOGIN_SUCCESS';
 const LOGIN_FAIL = 'authentication/LOGIN_FAIL';
@@ -88,8 +86,6 @@ export function login(username, password) {
     promise: (client) => client.post('/api/session', {username, password}),
     afterSuccess: (dispatch, getState, response) => {
       localStorage.setItem('auth-token', response.headers['x-auth-token']);
-      const routingState = getState().routing.locationBeforeTransitions.state || {};
-      browserHistory.push(routingState.nextPathname || '');
     }
   };
 }
@@ -98,9 +94,7 @@ export function logout() {
   return {
     types: [LOGOUT, LOGOUT_SUCCESS, LOGOUT_FAIL],
     promise: (client) => client.delete('/api/session'),
-    afterSuccess: () => {
-      browserHistory.push('login');
-    }
+    afterSuccess: () => {}
   };
 }
 
@@ -112,9 +106,7 @@ export function getSession() {
 }
 
 export function redirectToLoginWithMessage(messageKey) {
-  return (dispatch, getState) => {
-    const currentPath = getState().routing.locationBeforeTransitions.pathname;
+  return (dispatch) => {
     dispatch(displayAuthError(messageKey));
-    browserHistory.replace({pathname: '/login', state: {nextPathname: currentPath}});
   }
 }

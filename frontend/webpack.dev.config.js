@@ -1,8 +1,8 @@
-var path = require('path');
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var jeet = require('jeet');
-var nib = require('nib');
+const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const jeet = require('jeet');
+const nib = require('nib');
 
 module.exports = {
   devtool: 'inline-source-map',
@@ -17,7 +17,7 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin(),
+    new webpack.NoEmitOnErrorsPlugin,
     new webpack.DefinePlugin({
       "process.env": {
         NODE_ENV: JSON.stringify('development')
@@ -26,16 +26,23 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: 'Boot React',
       template: path.join(__dirname, 'assets/index-template.html')
-    })
+    }),
+    new webpack.LoaderOptionsPlugin({
+      options: {
+        stylus: {
+          use: [jeet(), nib()]
+        },
+      }
+    }),
   ],
   resolve: {
-    extensions: ['', '.js'],
-    root: path.join(__dirname, 'src')
+    extensions: ['.js'],
+    modules: [path.resolve(__dirname, 'src'), 'node_modules']
   },
   module: {
-    loaders: [{
+    rules: [{
       test: /\.js$/,
-      loaders: ['babel?cacheDirectory'],
+      loaders: ['babel-loader'],
       include: path.join(__dirname, 'src')
     }, {
       test: /\.styl$/,
@@ -44,8 +51,5 @@ module.exports = {
       test: /\.json/,
       loaders: ['json-loader']
     }]
-  },
-  stylus: {
-    use: [jeet(), nib()]
   }
 };

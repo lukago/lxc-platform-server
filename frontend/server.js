@@ -1,12 +1,11 @@
-var path = require('path');
-var express = require('express');
-var webpack = require('webpack');
-var config = require('./webpack.dev.config');
-var history = require('connect-history-api-fallback');
-var proxy = require('http-proxy-middleware');
+const express = require('express');
+const webpack = require('webpack');
+const config = require('./webpack.dev.config');
+const history = require('connect-history-api-fallback');
+const proxy = require('http-proxy-middleware');
 
-var app = express();
-var compiler = webpack(config);
+const app = express();
+const compiler = webpack(config);
 
 app.use(history());
 app.use(proxy('/api', {target: 'http://localhost:8080', changeOrigin: true}));

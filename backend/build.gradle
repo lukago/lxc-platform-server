@@ -14,12 +14,11 @@ buildscript {
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'groovy'
-apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'docker'
 
 jar {
-  baseName = 'boot-react'
+  baseName = 'lxc-paas'
   version = '0.0.1-SNAPSHOT'
 }
 sourceCompatibility = 1.11
@@ -31,15 +30,17 @@ repositories {
 }
 
 dependencies {
-  compile 'org.springframework.boot:spring-boot-starter-web'
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.1.0.RELEASE'
 
   // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.1.0.RELEASE'
 
-  compile 'org.springframework.boot:spring-boot-starter-security'
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.1.0.RELEASE'
 
-
-  compile 'org.springframework.boot:spring-boot-devtools'
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools
+  compile group: 'org.springframework.boot', name: 'spring-boot-devtools', version: '2.1.1.RELEASE'
 
   // https://mvnrepository.com/artifact/io.springfox/springfox-swagger2
   compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
@@ -56,23 +57,20 @@ dependencies {
   // https://mvnrepository.com/artifact/org.postgresql/postgresql
   compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
 
-  compile 'org.zeroturnaround:zt-exec:1.9'
+  // https://mvnrepository.com/artifact/org.zeroturnaround/zt-exec
+  compile group: 'org.zeroturnaround', name: 'zt-exec', version: '1.10'
 
   // https://mvnrepository.com/artifact/com.google.guava/guava
   compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
 
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.0.RELEASE'
 
-  testCompile 'org.springframework.boot:spring-boot-starter-test'
-  testCompile 'org.springframework.security:spring-security-test'
+  // https://mvnrepository.com/artifact/org.springframework.security/spring-security-test
+  testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.1.1.RELEASE'
+
+  // https://mvnrepository.com/artifact/org.spockframework/spock-core
   testCompile group: 'org.spockframework', name: 'spock-core', version: '1.2-groovy-2.5'
-  testCompile 'com.geowarin:spring-spock-mvc:0.2.1'
-}
-
-eclipse {
-  classpath {
-    containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
-    containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.11'
-  }
 }
 
 jar {
@@ -86,10 +84,9 @@ jar.dependsOn(':frontend:assemble')
 task buildDocker(type: Docker) {
   baseImage = 'develar/java:latest'
   push = false
-  tag = 'geowarin/boot-react'
+  tag = 'lukago/lxc-paas'
   addFile {
-    from jar
-    rename { 'app.jar' }
+    file 'app.jar'
   }
   entryPoint(['java', '-Djava.security.egd=file:/dev/./urandom', '-jar', '/app.jar'])
   exposePort(8080)

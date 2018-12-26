@@ -1,15 +1,16 @@
 import React from 'react';
-import reducer from 'reducers';
+import reducer from '../reducers';
 import { createStore, applyMiddleware, compose } from 'redux';
-import DevTools from 'config/devtools';
-import promiseMiddleware from 'config/promiseMiddleware';
+import DevTools from './devtools';
+import promiseMiddleware from './promiseMiddleware';
 
 const middlewares = process.env.NODE_ENV === 'development' ?
   [applyMiddleware(promiseMiddleware), DevTools.instrument()] :
   [applyMiddleware(promiseMiddleware)];
 
-var initialize = (initialState = {}) => {
-  const store = createStore(reducer, initialState, compose(...middlewares));
+const initialize = (initialState = {}) => {
+  const store = createStore(reducer, initialState,
+      compose(...middlewares));
 
   if (module.hot) {
     // Enable Webpack hot module replacement for reducers
