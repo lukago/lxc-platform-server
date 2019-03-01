@@ -12,8 +12,6 @@ import org.paas.lxc.dto.UserDto;
 import org.paas.lxc.dto.UserSafeDto;
 import org.paas.lxc.model.User;
 import org.paas.lxc.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 @Api(tags = "auth")
 public class AuthApi {
-
-  private static Logger log = LoggerFactory.getLogger(AuthApi.class);
 
   @Autowired
   private UserService userService;
@@ -42,7 +38,6 @@ public class AuthApi {
   })
   public SiginResponseDto login(
       @ApiParam("Credentials") @RequestBody CredentialsDto credentialsDto) {
-    log.info("user {} {}", credentialsDto.getPassword(), credentialsDto.getUsername());
     var response = new SiginResponseDto();
     response
         .setToken(userService.signin(credentialsDto.getUsername(), credentialsDto.getPassword()));
