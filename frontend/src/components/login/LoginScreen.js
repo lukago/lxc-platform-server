@@ -1,109 +1,140 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import ContentWrapper from '../common/ContentWrapper';
-import {color, deviceSize, margin} from '../styles/base';
-import {fontSize} from '../styles/typography';
-import InputText from '../common/element/InputText';
-import {PrimaryButton, SecondaryButton} from '../common/element/Button';
-import {HeaderSmall} from '../common/element/Header';
-import Spinner from '../common/element/Spinner';
-import Warning from '../common/element/Warning';
-import DefaultLayout from '../common/DefaultLayout';
+import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import FormControl from '@material-ui/core/FormControl';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import ErrorIcon from '@material-ui/icons/ErrorOutlined';
+import Typography from '@material-ui/core/Typography';
+import withStyles from '@material-ui/core/styles/withStyles';
 import * as t from '../../locale/translations';
+import TextField from "@material-ui/core/TextField/TextField";
+import CircularProgress from "@material-ui/core/CircularProgress/CircularProgress";
+import Chip from "@material-ui/core/Chip/Chip";
 
-const InputTextStyled = styled(InputText)`
-  margin-bottom: ${margin.md};
-  
-  @media (max-width: ${deviceSize.tabletMax}) {  
-    width: 100%;
-  }
-`;
+const styles = theme => ({
+  main: {
+    width: 'auto',
+    display: 'block',
+    marginLeft: theme.spacing.unit * 3,
+    marginRight: theme.spacing.unit * 3,
+    [theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
+      width: 400,
+      marginLeft: 'auto',
+      marginRight: 'auto',
+    },
+  },
+  paper: {
+    marginTop: theme.spacing.unit * 8,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 3}px ${theme.spacing.unit * 3}px`,
+  },
+  avatar: {
+    margin: theme.spacing.unit,
+    backgroundColor: theme.palette.secondary.main,
+  },
+  form: {
+    width: '100%',
+    marginTop: theme.spacing.unit,
+  },
+  submit: {
+    marginTop: theme.spacing.unit * 3,
+  },
+  chip: {
+    margin: theme.spacing.unit,
+    width: '100%',
+  },
+});
 
-const ButtonWrapper = styled.div`
-  margin-top: ${margin.md};
-  margin-bottom: ${margin.lg};
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  flex-flow: row wrap;
-`;
-
-const ButtonStyled = styled(PrimaryButton)`
-  width: 100%;
-  margin-top: ${margin.xs};
-`;
-
-const HeaderSmallWrapped = styled(HeaderSmall)`
-  margin-top: ${margin.md};
-  margin-bottom: ${margin.lg};
-`;
-
-const SpinnerMessage = styled.div`
-  font-size: ${fontSize.large};
-  margin-bottom: ${margin.md};
-`;
-
-const UserProfileScreen = (props) => {
+const LoginScreen = (props) => {
   const {
-    loginDisabled, credentials, startLogin, restartLogin,
-    handleChange, children, spinnerVisible, loginFailedMessage,
+    loginDisabled, credentials, startLogin,
+    handleChange, spinnerVisible, classes, loginFailed,
   } = props;
 
   return (
-      <DefaultLayout>
-        <ContentWrapper backgroundColor={color.veryLightGrey}>
-          <div>
-            <HeaderSmallWrapped>{t.login.head}</HeaderSmallWrapped>
+      <main className={classes.main}>
+        <CssBaseline />
+        <paper className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign in
+          </Typography>
+          <form className={classes.form}>
+            <FormControl margin="normal" required fullWidth>
+              <TextField id="email"
+                     name="email"
+                     autoComplete="email"
+                     autoFocus
+                     label={t.login.username}
+                     value={credentials.username}
+                     onChange={handleChange('username')}
+              />
+            </FormControl>
+            <FormControl margin="normal" required fullWidth>
+              <TextField
+                  name="password"
+                  type="password"
+                  id="password"
+                  autoComplete="current-password"
+                  propName="username"
+                  label={t.login.password}
+                  value={credentials.password}
+                  onChange={handleChange('password')}
+              />
+            </FormControl>
 
-            <InputTextStyled
-                propName="username"
-                label={t.login.username}
-                value={credentials.username}
-                onChange={handleChange}
-            />
-            <InputTextStyled
-                propName="password"
-                label={t.login.password}
-                value={credentials.password}
-                onChange={handleChange}
-            />
+            {
+              loginFailed && <Chip
+                  avatar={
+                    <Avatar>
+                      <ErrorIcon />
+                    </Avatar>
+                  }
+                  className={classes.chip}
+                  color="secondary"
+                  label={t.login.failed}
+              />
+            }
 
-            <ButtonWrapper>
-              <ButtonStyled text={t.login.start} onClick={startLogin} disabled={loginDisabled}/>
-            </ButtonWrapper>
+            <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                onClick={startLogin}
+                disabled={loginDisabled}
+            >
+              {spinnerVisible ?
+                  <CircularProgress size={25}/>
+                  : t.login.start
+              }
+            </Button>
+          </form>
 
-            {loginFailedMessage && (
-                <Warning message={loginFailedMessage}/>
-            )}
-
-            {spinnerVisible && (
-                <Spinner show>
-                  <SpinnerMessage>{t.login.spinner}</SpinnerMessage>
-                  <SecondaryButton type="button" onClick={restartLogin}
-                                   text={t.common.cancel}/>
-                </Spinner>
-            )}
-          </div>
-          {children}
-        </ContentWrapper>
-      </DefaultLayout>
+        </paper>
+      </main>
   );
 };
 
-UserProfileScreen.propTypes = {
+LoginScreen.propTypes = {
+  classes: PropTypes.object.isRequired,
   loginDisabled: PropTypes.bool.isRequired,
   credentials: PropTypes.shape({}).isRequired,
   startLogin: PropTypes.func.isRequired,
-  restartLogin: PropTypes.func.isRequired,
   handleChange: PropTypes.func.isRequired,
-  children: PropTypes.node,
   spinnerVisible: PropTypes.bool.isRequired,
-  loginFailedMessage: PropTypes.string.isRequired,
+  loginFailed: PropTypes.bool.isRequired,
 };
 
-UserProfileScreen.defaultProps = {
+LoginScreen.defaultProps = {
   spinnerVisible: false,
 };
 
-export default UserProfileScreen;
+export default withStyles(styles)(LoginScreen);

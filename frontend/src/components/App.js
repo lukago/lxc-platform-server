@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import { reactLocalStorage } from 'reactjs-localstorage'
 import jwtDecode from 'jwt-decode'
 import LogoutContainer from './login/LogoutContainer'
 import LoginContainer from './login/LoginContainer'
-import UserContainer from './user/UserContainer'
-import './styles/App.css';
+import UserDashboardContainer from './admin/AdminDashboardContainer'
+import UserListContainer from './admin/AdminListContainer'
+import './App.css';
 
 class App extends Component {
   constructor(props) {
@@ -34,8 +35,9 @@ class App extends Component {
           <BrowserRouter>
             <div>
               <Switch>
-                <Route path ="/logout" component={LogoutContainer}/>
-                <Route path ="/" exact component={UserContainer}/>
+                <Route path ="/logout" component={LogoutContainer} />
+                <Route path ="/users" exact component={UserListContainer} />
+                <Route path ="/" exact component={UserDashboardContainer} />
               </Switch>
             </div>
           </BrowserRouter>

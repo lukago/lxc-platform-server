@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import * as authActions from '../../actions/authActions';
+import * as authActions from './authActions';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import LoginScreen from './LoginScreen';
 
@@ -12,14 +12,15 @@ class LoginContainer extends Component {
       credentials: {
         username: '',
         password: '',
-      }
+      },
+      loginFailed: false,
     };
   }
 
-  handleChange = (name, value) => {
+  handleChange = name => event => {
     const { credentials } = this.state;
 
-    credentials[name] = value;
+    credentials[name] = event.target.value;
 
     this.setState(prevProps => ({
       ...prevProps,
@@ -29,13 +30,9 @@ class LoginContainer extends Component {
 
   componentDidUpdate(prevProps) {
     this.handleTokenFetched(!prevProps.token && this.props.token);
-    this.handleServerError(prevProps.error !== this.props.error);
     this.handleUserFetched(!prevProps.user && this.props.user);
+    this.handleLoginFailed(!prevProps.loginFailed && this.props.loginFailed);
   }
-
-  startAgain = () => {
-    this.props.restartLogin();
-  };
 
   startLogin = async (event) => {
     event.preventDefault();
@@ -59,9 +56,15 @@ class LoginContainer extends Component {
     }
   }
 
-  handleServerError(isErrorChanged) {
-    if (isErrorChanged && this.props.error) {
-      this.props.loginFailed('Login failed');
+  handleLoginFailed(isFailed) {
+    if (isFailed) {
+      this.setState({
+        ...this.state,
+        credentials: {
+          username: '',
+          password: '',
+        },
+      });
     }
   }
 
@@ -70,11 +73,9 @@ class LoginContainer extends Component {
       loginDisabled: this.props.spinnerVisible,
       credentials: this.state.credentials,
       startLogin: this.startLogin,
-      restartLogin: this.startAgain,
       handleChange: this.handleChange,
-      children: this.props.children,
       spinnerVisible: this.props.spinnerVisible,
-      loginFailedMessage: this.props.loginFailedMessage,
+      loginFailed: this.props.loginFailed,
     };
     return (
         <Fragment>
@@ -95,7 +96,7 @@ LoginContainer.defaultProps = {
 const mapStateToProps = state => {
   return {
     spinnerVisible: state.auth.inProgress,
-    loginFailedMessage: state.auth.loginFailedMessage,
+    loginFailed: state.auth.loginFailed,
     user: state.auth.user,
     token: state.auth.token,
     error: state.auth.error,

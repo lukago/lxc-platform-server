@@ -10,5 +10,6 @@ module.exports = {
     password: 'Password',
     start: 'Sign in',
     spinner: 'Signing in...',
+    failed: 'Bad credentials. Try again.'
   }
 };

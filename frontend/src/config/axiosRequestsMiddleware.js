@@ -1,8 +1,7 @@
 import axiosMiddleware from 'redux-axios-middleware';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import { axiosClient } from './axiosClient';
-
-import { sessionTimeout, clearUserData } from '../actions/authActions';
+import { sessionTimeout, clearUserData } from '../components/login/authActions';
 
 function handleUnauthorized(dispatch, status) {
   if (status === 401) {
@@ -27,8 +26,7 @@ const options = {
         handleUnauthorized(dispatch, error.response.status);
         return Promise.reject(error);
       },
-    },
-    ],
+    }]
   },
 };
 

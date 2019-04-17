@@ -1,21 +1,13 @@
 import Cookies from 'universal-cookie';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import {
-  LOGIN_FAILED, RESTART_LOGIN, START_AUTHENTICATION, SESSION_TIMEOUT,
-  FETCH_CURRENT_USER, LOGOUT, USER_SAVED_IN_LOCAL_STORAGE,
+  START_AUTHENTICATION,
+  SESSION_TIMEOUT,
+  FETCH_CURRENT_USER,
+  LOGOUT,
+  USER_SAVED_IN_LOCAL_STORAGE,
 } from './types';
 
-export function loginFailed(message) {
-  return { type: LOGIN_FAILED, payload: message };
-}
-
-export function loginRestarted() {
-  return { type: RESTART_LOGIN };
-}
-
-export const restartLogin = () => async (dispatch) => {
-  dispatch(loginRestarted());
-};
 
 export const saveUserInLocalStorage = user => async (dispatch) => {
   reactLocalStorage.set('user', JSON.stringify(user));
@@ -61,7 +53,6 @@ export const handleLogout = () => {
     },
   };
 };
-
 
 export function sessionTimeout() {
   return {

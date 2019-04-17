@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
 import { reactLocalStorage } from 'reactjs-localstorage';
-import * as actions from '../../actions';
+import * as authActions from './authActions';
 
 class LogoutContainer extends Component {
   componentDidMount() {
@@ -28,4 +28,4 @@ function mapStateToProps({ config, auth }) {
   };
 }
 
-export default connect(mapStateToProps, actions)(LogoutContainer);
+export default connect(mapStateToProps, authActions)(LogoutContainer);

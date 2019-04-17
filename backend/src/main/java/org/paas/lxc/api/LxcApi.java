@@ -9,6 +9,7 @@ import org.paas.lxc.service.LxcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,11 +24,12 @@ public class LxcApi {
   LxcService lxcService;
 
   @PostMapping("/{username}/create")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ApiOperation(value = "")
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
   })
-  public ResponseEntity<?> createLxcForUser(@ApiParam("Credentials") @PathVariable String username) {
+  public ResponseEntity<?> createLxcForUser(@ApiParam("Username") @PathVariable String username) {
     try {
       lxcService.create(username);
       return new ResponseEntity<>(HttpStatus.OK);
