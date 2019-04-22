@@ -8,7 +8,7 @@ import CircularProgress
   from "@material-ui/core/CircularProgress/CircularProgress";
 import Button from "@material-ui/core/Button/Button";
 import connect from "react-redux/es/connect/connect";
-import { createLxc } from './lxcActions';
+import { createLxc, connectSocket, disconnectSocket } from './lxcActions';
 
 const styles = theme => ({
   root: {
@@ -46,12 +46,29 @@ class LxcContainer extends React.Component {
     }
   }
 
+  handleStreamReceived(isNotNull) {
+    if (isNotNull) {
+      console.log(this.props.stream);
+      this.props.stream.on('data', chunk => console.log(chunk));
+      this.props.stream.on('end', () => console.log('end'));
+    }
+  }
+
   sendCreate = () => {
     this.props.createLxc(this.state.lxcName);
   };
 
+  componentDidMount() {
+    this.props.connectSocket();
+  }
+
+  componentWillUnmount() {
+    this.props.disconnectSocket();
+  }
+
   componentDidUpdate(prevProps) {
     this.handleLxcCreateFailed(!prevProps.createFailed && this.props.createFailed);
+    this.handleStreamReceived(!prevProps.stream && this.props.stream)
   }
 
   render() {
@@ -89,7 +106,10 @@ function mapStateToProps({ lxc }) {
   return {
     inProgress: lxc.inProgress,
     createFailed: lxc.createFailed,
+    stream: lxc.stream,
   };
 }
 
-export default connect(mapStateToProps, { createLxc })(withStyles(styles)(LxcContainer));
+export default connect(mapStateToProps, {
+  createLxc, connectSocket, disconnectSocket,
+})(withStyles(styles)(LxcContainer));

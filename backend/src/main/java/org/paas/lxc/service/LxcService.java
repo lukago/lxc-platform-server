@@ -1,77 +1,47 @@
 package org.paas.lxc.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.Date;
+import java.util.UUID;
+import org.paas.lxc.model.Job;
+import org.paas.lxc.model.JobStatus;
+import org.paas.lxc.respository.JobRepository;
+import org.paas.lxc.service.job.LxcCreateTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.EmitterProcessor;
 
 @Service
 public class LxcService {
 
   private static Logger log = LoggerFactory.getLogger(LxcService.class);
 
+  @Autowired
+  JobRepository jobRepository;
+
   /**
    * lxc-create chain
    *
    * @param username user to create lxc for
    */
-  public void create(String username) throws IOException, InterruptedException {
+  @Async
+  public void create(String username, EmitterProcessor<String> processor) {
     log.info("creating lxc for {}", username);
-
     Cmds cmds = initCmds(username);
 
-    Process lxcCreate = Runtime.getRuntime().exec(cmds.lxcCreateCmd);
-    logProcess(lxcCreate, cmds.lxcCreateCmd);
-    lxcCreate.waitFor();
+    Job job = new Job();
+    job.setStartDate(new Date());
+    job.setJobStatus(JobStatus.PENDING);
+    job.setKey(UUID.randomUUID().toString());
+    job.setDescription("LXC create, name: " + username);
+    Job savedJob = jobRepository.save(job);
 
-    Process lxcStart = Runtime.getRuntime().exec(cmds.lxcStartCmd);
-    logProcess(lxcStart, cmds.lxcStartCmd);
-    lxcStart.waitFor();
-
-    Process lxcStop = Runtime.getRuntime().exec(cmds.lxcStopCmd);
-    logProcess(lxcStop, cmds.lxcStopCmd);
-    lxcStart.waitFor();
-
-    Process lxcRestart = Runtime.getRuntime().exec(cmds.lxcStartCmd);
-    logProcess(lxcRestart, cmds.lxcStartCmd);
-    lxcStart.waitFor();
-
-    Process lxcAttach = Runtime.getRuntime().exec(cmds.lxcAttachCmdBash);
-    logProcess(lxcAttach, cmds.lxcAttachCmdBash[2]);
-    lxcAttach.waitFor();
-
-    Process getIp = Runtime.getRuntime().exec(cmds.getIpCmd);
-    String ip = readAndLogProcess(getIp, cmds.getIpCmd);
-    getIp.waitFor();
-
-    log.info("ssh user@{}", ip);
+    LxcCreateTask lxcTask = new LxcCreateTask(savedJob, cmds, processor, jobRepository);
+    lxcTask.run();
   }
 
-  private void logProcess(Process process, String cmd) throws IOException {
-    log.info("> " + cmd);
-
-    String line;
-    var br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    while ((line = br.readLine()) != null) {
-      log.info(line);
-    }
-  }
-
-  private String readAndLogProcess(Process process, String cmd) throws IOException {
-    log.info("> " + cmd);
-
-    String line;
-    var sb = new StringBuilder();
-    var br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    while ((line = br.readLine()) != null) {
-      log.info(line);
-      sb.append(line);
-    }
-
-    return sb.toString();
-  }
 
   private Cmds initCmds(String username) {
     Cmds cmds = new Cmds();
@@ -91,13 +61,12 @@ public class LxcService {
     return cmds;
   }
 
-  private class Cmds {
-
-    String lxcCreateCmd;
-    String lxcAttachCmd;
-    String[] lxcAttachCmdBash;
-    String lxcStartCmd;
-    String lxcStopCmd;
-    String getIpCmd;
+  public static class Cmds {
+    public String lxcCreateCmd;
+    public String lxcAttachCmd;
+    public String[] lxcAttachCmdBash;
+    public String lxcStartCmd;
+    public String lxcStopCmd;
+    public String getIpCmd;
   }
 }

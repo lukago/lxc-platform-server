@@ -13,6 +13,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import org.paas.lxc.exception.HttpException;
 import org.paas.lxc.model.Role;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenProvider {
+
+  private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
 
   @Value("${security.jwt.token.secret-key:secret-key}")
   private String secretKey;
@@ -78,6 +82,7 @@ public class JwtTokenProvider {
       Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
       return true;
     } catch (JwtException | IllegalArgumentException e) {
+      log.info("Exception in jwt token provider when validation: {}", e);
       throw new HttpException("Expired or invalid JWT token", HttpStatus.PRECONDITION_FAILED);
     }
   }

@@ -5,6 +5,7 @@ import {
 const initialState = {
   createFailed: false,
   inProgress: false,
+  stream: null,
 };
 
 export default function (state = initialState, action) {
@@ -15,7 +16,7 @@ export default function (state = initialState, action) {
     case CREATE_LXC_SUCCESS:
       return {
         ...state,
-        token: action.payload.data.token,
+        stream: action.payload.data,
         inProgress: false,
         createFailed: false,
       };
