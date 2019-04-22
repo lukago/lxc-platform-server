@@ -89,18 +89,8 @@ class AuthenticationSpec extends MockMvcSpec {
   def 'should have no permission'() {
     when:
     def jwtRequest = new CredentialsDto(username: 'user2', password: 'password123')
-    def response = mockMvc.perform(post('/api/auth/signin')
+    def response = mockMvc.perform(post('/api/lxc/create')
         .content(toJson(jwtRequest))
-        .contentType(MediaType.APPLICATION_JSON))
-        .andReturn().response
-
-    def responseMap = new JsonSlurper().parseText(response.contentAsString)
-    token = new SiginResponseDto(token: responseMap.token)
-
-    response = mockMvc.perform(post('/api/auth/signup')
-        .content(toJson(new UserDto(
-        username: "u2", roles: [Role.ROLE_ADMIN], email: "a2@a.com", password: "password123")))
-        .header("Authorization", "Bearer $token.token")
         .contentType(MediaType.APPLICATION_JSON))
         .andReturn().response
 
