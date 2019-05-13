@@ -21,9 +21,6 @@ public class Container {
   @Column(unique = true, nullable = false)
   private String name;
 
-  @Column(nullable = false)
-  private Boolean running;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "owner_id")
   private User owner;
@@ -42,14 +39,6 @@ public class Container {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public Boolean getRunning() {
-    return running;
-  }
-
-  public void setRunning(Boolean running) {
-    this.running = running;
   }
 
   public User getOwner() {

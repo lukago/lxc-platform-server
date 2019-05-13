@@ -33,7 +33,8 @@ public class UserService {
   public String signin(String username, String password) {
     try {
       authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-      return jwtTokenProvider.createToken(username, userRepository.findByUsername(username).getRoles());
+      User user = search(username);
+      return jwtTokenProvider.createToken(username, user.getRoles());
     } catch (AuthenticationException e) {
       throw new HttpException("Invalid username/password supplied", HttpStatus.UNPROCESSABLE_ENTITY);
     }
@@ -55,15 +56,13 @@ public class UserService {
   }
 
   public User search(String username) {
-    User user = userRepository.findByUsername(username);
-    if (user == null) {
-      throw new HttpException("The user doesn't exist", HttpStatus.NOT_FOUND);
-    }
-    return user;
+    return userRepository
+        .findByUsername(username)
+        .orElseThrow(() -> new HttpException("The user doesn't exist", HttpStatus.NOT_FOUND));
   }
 
   public User whoami(HttpServletRequest req) {
-    return userRepository.findByUsername(jwtTokenProvider.getUsername(jwtTokenProvider.resolveToken(req)));
+    return search(jwtTokenProvider.getUsername(jwtTokenProvider.resolveToken(req)));
   }
 
 }

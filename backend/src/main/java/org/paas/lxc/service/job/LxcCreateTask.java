@@ -1,17 +1,14 @@
 package org.paas.lxc.service.job;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Date;
-import org.modelmapper.ModelMapper;
-import org.paas.lxc.dto.JobDto;
 import org.paas.lxc.model.Container;
 import org.paas.lxc.model.Job;
 import org.paas.lxc.model.JobStatus;
 import org.paas.lxc.respository.ContainerRepository;
 import org.paas.lxc.respository.JobRepository;
 import org.paas.lxc.service.LxcService.Cmds;
+import org.paas.lxc.service.ProcessLogger;
 import org.reactivestreams.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +48,6 @@ public class LxcCreateTask implements JobTask {
 
       Container container = new Container();
       container.setName(cmds.name);
-      container.setRunning(false);
       containerRepository.save(container);
 
       job.setJobStatus(JobStatus.DONE);
@@ -71,53 +67,31 @@ public class LxcCreateTask implements JobTask {
 
   private void create() throws IOException, InterruptedException {
     Process lxcCreate = Runtime.getRuntime().exec(cmds.lxcCreateCmd);
-    logProcess(lxcCreate, cmds.lxcCreateCmd);
+    ProcessLogger.logProcess(lxcCreate, cmds.lxcCreateCmd);
     lxcCreate.waitFor();
 
     Process lxcStart = Runtime.getRuntime().exec(cmds.lxcStartCmd);
-    logProcess(lxcStart, cmds.lxcStartCmd);
+    ProcessLogger.logProcess(lxcStart, cmds.lxcStartCmd);
     lxcStart.waitFor();
 
     Process lxcStop = Runtime.getRuntime().exec(cmds.lxcStopCmd);
-    logProcess(lxcStop, cmds.lxcStopCmd);
+    ProcessLogger.logProcess(lxcStop, cmds.lxcStopCmd);
     lxcStart.waitFor();
 
     Process lxcRestart = Runtime.getRuntime().exec(cmds.lxcStartCmd);
-    logProcess(lxcRestart, cmds.lxcStartCmd);
+    ProcessLogger.logProcess(lxcRestart, cmds.lxcStartCmd);
     lxcStart.waitFor();
 
     Process lxcAttach = Runtime.getRuntime().exec(cmds.lxcAttachCmdBash);
-    logProcess(lxcAttach, cmds.lxcAttachCmdBash[2]);
+    ProcessLogger.logProcess(lxcAttach, cmds.lxcAttachCmdBash[2]);
     lxcAttach.waitFor();
 
     Process getIp = Runtime.getRuntime().exec(cmds.getIpCmd);
-    String ip = readAndLogProcess(getIp, cmds.getIpCmd);
+    String ip = ProcessLogger.readAndLogProcess(getIp, cmds.getIpCmd);
     getIp.waitFor();
 
     log.info("ssh user@{}", ip);
   }
 
-  private void logProcess(Process process, String cmd) throws IOException {
-    log.info("> " + cmd);
 
-    String line;
-    var br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    while ((line = br.readLine()) != null) {
-      log.info(line);
-    }
-  }
-
-  private String readAndLogProcess(Process process, String cmd) throws IOException {
-    log.info("> " + cmd);
-
-    String line;
-    var sb = new StringBuilder();
-    var br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    while ((line = br.readLine()) != null) {
-      log.info(line);
-      sb.append(line);
-    }
-
-    return sb.toString();
-  }
 }

@@ -1,16 +1,23 @@
 package org.paas.lxc.service;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import javax.transaction.Transactional;
+import org.paas.lxc.exception.HttpException;
+import org.paas.lxc.model.Container;
 import org.paas.lxc.model.Job;
 import org.paas.lxc.model.JobStatus;
+import org.paas.lxc.model.User;
 import org.paas.lxc.respository.ContainerRepository;
 import org.paas.lxc.respository.JobRepository;
+import org.paas.lxc.respository.UserRepository;
 import org.paas.lxc.service.job.LxcCreateTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.EmitterProcessor;
@@ -25,6 +32,9 @@ public class LxcService {
 
   @Autowired
   ContainerRepository containerRepository;
+
+  @Autowired
+  UserRepository userRepository;
 
   @Async
   @Transactional
@@ -50,6 +60,94 @@ public class LxcService {
     lxcTask.run();
   }
 
+  @Transactional
+  public void assignUserToLxc(String lxcName, String username) {
+    Container container = containerRepository
+        .findByName(lxcName)
+        .orElseThrow(() -> new HttpException("Container for given name not found", HttpStatus.NOT_FOUND));
+    User user = userRepository
+        .findByUsername(username)
+        .orElseThrow(() -> new HttpException("User for given username not found", HttpStatus.NOT_FOUND));
+
+    container.setOwner(user);
+    containerRepository.save(container);
+  }
+
+  public List<Container> getAllContainers() {
+    return containerRepository.findAll();
+  }
+
+  public List<Container> getUserContainers(User user) {
+    return containerRepository.findAllByOwner(user);
+  }
+
+  public String getLxcStatusForUser(User user, String lxcName) {
+    Container container = containerRepository
+        .findByNameAndOwner(lxcName, user)
+        .orElseThrow(() -> new HttpException("Container for name and user not found", HttpStatus.NOT_FOUND));
+
+    String cmd = String.format("lxc-info -n %s", container.getName());
+    return runProcess(cmd);
+  }
+
+  public String getLxcStatus(String lxcName) {
+    Container container = containerRepository
+        .findByName(lxcName)
+        .orElseThrow(() -> new HttpException("Container for name not found", HttpStatus.NOT_FOUND));
+
+    String cmd = String.format("lxc-info -n %s", container.getName());
+    return runProcess(cmd);
+  }
+
+  public String startLxcForUser(User user, String lxcName) {
+    Container container = containerRepository
+        .findByNameAndOwner(lxcName, user)
+        .orElseThrow(() -> new HttpException("Container for name and user not found", HttpStatus.NOT_FOUND));
+
+    String cmd = String.format("lxc-start -n %s", container.getName());
+    return runProcess(cmd);
+  }
+
+  public String startLxc(String lxcName) {
+    Container container = containerRepository
+        .findByName(lxcName)
+        .orElseThrow(() -> new HttpException("Container for name not found", HttpStatus.NOT_FOUND));
+
+    String cmd = String.format("lxc-start -n %s", container.getName());
+    return runProcess(cmd);
+  }
+
+  public String stopLxcForUser(User user, String lxcName) {
+    Container container = containerRepository
+        .findByNameAndOwner(lxcName, user)
+        .orElseThrow(() -> new HttpException("Container for name and user not found", HttpStatus.NOT_FOUND));
+
+    String cmd = String.format("lxc-stop -n %s", container.getName());
+    return runProcess(cmd);
+  }
+
+  public String stopLxc(String lxcName) {
+    Container container = containerRepository
+        .findByName(lxcName)
+        .orElseThrow(() -> new HttpException("Container for name not found", HttpStatus.NOT_FOUND));
+
+    String cmd = String.format("lxc-stop -n %s", container.getName());
+    return runProcess(cmd);
+  }
+
+  private String runProcess(String cmd) {
+    String result;
+
+    try {
+      Process process = Runtime.getRuntime().exec(cmd);
+      result = ProcessLogger.readAndLogProcess(process, cmd);
+      process.waitFor();
+    } catch (IOException | InterruptedException e) {
+      throw new HttpException("Error when running cmd:" + cmd, HttpStatus.BAD_REQUEST);
+    }
+
+    return result;
+  }
 
   private Cmds initCmds(String name, String username, String password) {
     Cmds cmds = new Cmds();
@@ -59,10 +157,10 @@ public class LxcService {
     cmds.lxcCreateCmd = String.format("lxc-create -n %s -t download -- "
         + "--dist ubuntu --release bionic --arch amd64", name);
     cmds.lxcAttachCmd = String.format("lxc-attach -n %s --clear-env "
-        + "-- bash -c 'echo nameserver 212.51.192.2 >> /etc/resolv.conf; "
-        + "echo nameserver 8.8.8.8 >> /etc/resolv.conf; "
-        + "apt-get -y install openssh-server; useradd -m user; "
-        + "echo root:haslo123 | chpasswd; echo %s:%s | chpasswd; echo done'",
+            + "-- bash -c 'echo nameserver 212.51.192.2 >> /etc/resolv.conf; "
+            + "echo nameserver 8.8.8.8 >> /etc/resolv.conf; "
+            + "apt-get -y install openssh-server; useradd -m user; "
+            + "echo root:haslo123 | chpasswd; echo %s:%s | chpasswd; echo done'",
         name, username, password);
     cmds.lxcAttachCmdBash = new String[]{"/bin/bash", "-c", cmds.lxcAttachCmd};
     cmds.lxcStartCmd = String.format("lxc-start -n %s", name);

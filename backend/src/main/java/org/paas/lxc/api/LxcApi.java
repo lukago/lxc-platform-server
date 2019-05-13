@@ -6,7 +6,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
+import org.paas.lxc.dto.ContainerDto;
 import org.paas.lxc.dto.JobDto;
 import org.paas.lxc.dto.LxcCreateDto;
 import org.paas.lxc.model.Job;
@@ -20,9 +23,12 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.EmitterProcessor;
 
@@ -50,7 +56,7 @@ public class LxcApi {
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
   })
-  public ResponseEntity<?> createLxc(@ApiParam("Username") @RequestBody LxcCreateDto lxcCreateDto) {
+  public ResponseEntity<Void> createLxc(@ApiParam("lxcCreateDto") @RequestBody LxcCreateDto lxcCreateDto) {
     EmitterProcessor<Job> processor = EmitterProcessor.create();
 
     processor.subscribe(job -> {
@@ -67,6 +73,65 @@ public class LxcApi {
     );
 
     return new ResponseEntity<>(HttpStatus.ACCEPTED);
+  }
+
+  @PostMapping
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @ApiOperation(value = "")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Something went wrong"),
+  })
+  @RequestMapping("/api/lxc/{lxcName}/assign")
+  public ResponseEntity<Void> assignLxcToUser(
+      @ApiParam("lxcName") @PathVariable String lxcName,
+      @ApiParam("username") @RequestParam  String username
+  ) {
+    lxcService.assignUserToLxc(lxcName, username);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @GetMapping
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @ApiOperation(value = "")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Something went wrong"),
+  })
+  @RequestMapping("/api/lxc")
+  public ResponseEntity<List<ContainerDto>> getLxcs() {
+    var containers = lxcService.getAllContainers()
+        .stream()
+        .map(cont -> modelMapper.map(cont, ContainerDto.class))
+        .collect(Collectors.toList());
+
+    return new ResponseEntity<>(containers, HttpStatus.OK);
+  }
+
+  @PostMapping
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @ApiOperation(value = "")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Something went wrong"),
+  })
+  @RequestMapping("/api/lxc/{lxcName}/start")
+  public ResponseEntity<String> startLxc(
+      @ApiParam("lxcName") @PathVariable String lxcName
+  ) {
+    String res = lxcService.startLxc(lxcName);
+    return new ResponseEntity<>(res, HttpStatus.OK);
+  }
+
+  @PostMapping
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @ApiOperation(value = "")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Something went wrong"),
+  })
+  @RequestMapping("/api/lxc/{lxcName}/stop")
+  public ResponseEntity<String> stopLxc(
+      @ApiParam("lxcName") @PathVariable String lxcName
+  ) {
+    String res = lxcService.stopLxc(lxcName);
+    return new ResponseEntity<>(res, HttpStatus.OK);
   }
 
   @MessageMapping("sc/jobs")
