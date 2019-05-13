@@ -7,6 +7,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import java.util.List;
@@ -20,7 +21,7 @@ public class User {
   private Integer id;
 
   @ElementCollection(fetch = FetchType.EAGER)
-  List<Role> roles;
+  private List<Role> roles;
 
   @Size(min = 4, max = 255, message = "Minimum username length: 4 characters")
   @Column(unique = true, nullable = false)
@@ -31,6 +32,9 @@ public class User {
 
   @Size(min = 8, message = "Minimum password length: 8 characters")
   private String password;
+
+  @OneToMany(mappedBy = "owner")
+  private List<Container> containers;
 
   public Integer getId() {
     return id;
@@ -72,4 +76,11 @@ public class User {
     this.roles = roles;
   }
 
+  public List<Container> getContainers() {
+    return containers;
+  }
+
+  public void setContainers(List<Container> containers) {
+    this.containers = containers;
+  }
 }

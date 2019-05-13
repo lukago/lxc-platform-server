@@ -1,11 +1,15 @@
 package org.paas.lxc.api;
 
+import com.google.gson.Gson;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.modelmapper.ModelMapper;
+import org.paas.lxc.dto.JobDto;
 import org.paas.lxc.dto.LxcCreateDto;
+import org.paas.lxc.model.Job;
 import org.paas.lxc.service.LxcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +39,11 @@ public class LxcApi {
   @Autowired
   private SimpMessagingTemplate template;
 
+  @Autowired
+  private ModelMapper modelMapper;
+
+  private Gson gson = new Gson();
+
   @PostMapping
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ApiOperation(value = "")
@@ -42,14 +51,21 @@ public class LxcApi {
       @ApiResponse(code = 400, message = "Something went wrong"),
   })
   public ResponseEntity<?> createLxc(@ApiParam("Username") @RequestBody LxcCreateDto lxcCreateDto) {
-    EmitterProcessor<String> processor = EmitterProcessor.create();
+    EmitterProcessor<Job> processor = EmitterProcessor.create();
 
-    processor.subscribe(str -> {
-      log.info("LXC: {}", str);
-      template.convertAndSend("/sc/topic/jobs", str);
+    processor.subscribe(job -> {
+      String jobJson = gson.toJson(modelMapper.map(job, JobDto.class));
+      log.info("LXC: {}", jobJson);
+      template.convertAndSend("/sc/topic/jobs", jobJson);
     });
 
-    lxcService.create(lxcCreateDto.getName(), processor);
+    lxcService.create(
+        lxcCreateDto.getName(),
+        lxcCreateDto.getUsername(),
+        lxcCreateDto.getPassword(),
+        processor
+    );
+
     return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
 

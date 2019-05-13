@@ -28,9 +28,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     // Entry points
     http.csrf().disable().cors().and().authorizeRequests()
-        .antMatchers("/api/auth/**").permitAll()
-        .antMatchers("/api/**").authenticated()
-        .antMatchers("/sc/**").permitAll();
+        .antMatchers("/api/auth/signin").permitAll()
+        .antMatchers("/api/**").authenticated();
 
     // Apply JWT
     http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));

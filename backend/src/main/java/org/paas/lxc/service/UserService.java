@@ -2,6 +2,7 @@ package org.paas.lxc.service;
 
 import javax.servlet.http.HttpServletRequest;
 
+import javax.transaction.Transactional;
 import org.paas.lxc.exception.HttpException;
 import org.paas.lxc.model.User;
 import org.paas.lxc.security.JwtTokenProvider;
@@ -38,6 +39,7 @@ public class UserService {
     }
   }
 
+  @Transactional
   public User signup(User user) {
     if (!userRepository.existsByUsername(user.getUsername())) {
       user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -47,6 +49,7 @@ public class UserService {
     }
   }
 
+  @Transactional
   public void delete(String username) {
     userRepository.deleteByUsername(username);
   }

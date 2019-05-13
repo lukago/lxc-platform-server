@@ -35,14 +35,6 @@ public class Job {
     return id;
   }
 
-  public String getKey() {
-    return key;
-  }
-
-  public void setKey(String key) {
-    this.key = key;
-  }
-
   public JobStatus getJobStatus() {
     return jobStatus;
   }
@@ -73,5 +65,17 @@ public class Job {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public void setId(Integer id) {
+    this.id = id;
+  }
+
+  public String getKey() {
+    return key;
+  }
+
+  public void setKey(String key) {
+    this.key = key;
   }
 }

@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
+import org.modelmapper.ModelMapper;
+import org.paas.lxc.dto.JobDto;
+import org.paas.lxc.model.Container;
 import org.paas.lxc.model.Job;
 import org.paas.lxc.model.JobStatus;
+import org.paas.lxc.respository.ContainerRepository;
 import org.paas.lxc.respository.JobRepository;
 import org.paas.lxc.service.LxcService.Cmds;
 import org.reactivestreams.Processor;
@@ -18,14 +22,17 @@ public class LxcCreateTask implements JobTask {
 
   private Job job;
   private Cmds cmds;
-  private Processor<String, String> processor;
+  private Processor<Job, Job> processor;
   private JobRepository jobRepository;
+  private ContainerRepository containerRepository;
 
-  public LxcCreateTask(Job job, Cmds cmds, Processor<String, String> processor, JobRepository jobRepository) {
+  public LxcCreateTask(Job job, Cmds cmds, Processor<Job, Job> processor,
+      JobRepository jobRepository, ContainerRepository containerRepository) {
     this.job = job;
     this.cmds = cmds;
     this.processor = processor;
     this.jobRepository = jobRepository;
+    this.containerRepository = containerRepository;
   }
 
   @Override
@@ -35,24 +42,31 @@ public class LxcCreateTask implements JobTask {
 
   @Override
   public void run() {
-    processor.onNext("Runned!");
+    job.setJobStatus(JobStatus.IN_PROGRESS);
+    job = jobRepository.save(job);
+    processor.onNext(job);
 
     try {
       create();
+
+      Container container = new Container();
+      container.setName(cmds.name);
+      container.setRunning(false);
+      containerRepository.save(container);
+
+      job.setJobStatus(JobStatus.DONE);
+      job.setEndDate(new Date());
+      job = jobRepository.save(job);
+
+      processor.onNext(job);
     } catch (Exception e) {
       log.info("Job exception: {}", e);
       job.setJobStatus(JobStatus.FAILED);
       job.setEndDate(new Date());
       job = jobRepository.save(job);
-      processor.onNext("Failed!");
+      processor.onNext(job);
       throw new IllegalThreadStateException("Lxc create job exception");
     }
-
-    job.setJobStatus(JobStatus.DONE);
-    job.setEndDate(new Date());
-    job = jobRepository.save(job);
-
-    processor.onNext("Done!");
   }
 
   private void create() throws IOException, InterruptedException {

@@ -4,10 +4,10 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class CredentialsDto {
 
-  @ApiModelProperty()
+  @ApiModelProperty
   private String username;
 
-  @ApiModelProperty(position = 1)
+  @ApiModelProperty
   private String password;
 
   public String getUsername() {

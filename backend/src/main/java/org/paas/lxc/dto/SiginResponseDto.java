@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class SiginResponseDto {
 
-  @ApiModelProperty()
+  @ApiModelProperty
   private String token;
 
   public String getToken() {

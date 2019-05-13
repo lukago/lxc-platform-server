@@ -44,6 +44,7 @@ public class AuthApi {
     return response;
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/signup")
   @ApiOperation(value = "")
   @ApiResponses(value = {

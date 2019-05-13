@@ -6,16 +6,16 @@ import org.paas.lxc.model.Role;
 
 public class UserDto {
 
-  @ApiModelProperty()
+  @ApiModelProperty
   private String username;
 
-  @ApiModelProperty(position = 1)
+  @ApiModelProperty
   private String email;
 
-  @ApiModelProperty(position = 2)
+  @ApiModelProperty
   private List<Role> roles;
 
-  @ApiModelProperty(position = 3)
+  @ApiModelProperty
   private String password;
 
   public String getUsername() {
