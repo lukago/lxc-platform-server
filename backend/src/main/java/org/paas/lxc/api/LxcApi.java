@@ -81,7 +81,7 @@ public class LxcApi {
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
   })
-  @RequestMapping("/api/lxc/{lxcName}/assign")
+  @RequestMapping("/{lxcName}/assign")
   public ResponseEntity<Void> assignLxcToUser(
       @ApiParam("lxcName") @PathVariable String lxcName,
       @ApiParam("username") @RequestParam  String username
@@ -96,7 +96,6 @@ public class LxcApi {
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
   })
-  @RequestMapping("/api/lxc")
   public ResponseEntity<List<ContainerDto>> getLxcs() {
     var containers = lxcService.getAllContainers()
         .stream()
@@ -112,7 +111,7 @@ public class LxcApi {
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
   })
-  @RequestMapping("/api/lxc/{lxcName}/start")
+  @RequestMapping("/{lxcName}/start")
   public ResponseEntity<String> startLxc(
       @ApiParam("lxcName") @PathVariable String lxcName
   ) {
@@ -126,7 +125,7 @@ public class LxcApi {
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
   })
-  @RequestMapping("/api/lxc/{lxcName}/stop")
+  @RequestMapping("/{lxcName}/stop")
   public ResponseEntity<String> stopLxc(
       @ApiParam("lxcName") @PathVariable String lxcName
   ) {

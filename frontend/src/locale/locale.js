@@ -43,9 +43,15 @@ const en = {
       content: 'Content',
     },
     lxc: {
-      addLxc: 'Add lxc',
+      addLxc: 'Add LXC',
+      lxcList: 'LXC list',
       lxcName: 'Container name',
+      lxcUsername: 'Container username',
+      lxcPassword: 'Container password',
       create: 'Create',
+      name: 'Name',
+      owner: 'Owner username',
+      unasigned: '-',
     }
   },
   user: {

@@ -70,7 +70,7 @@ dependencies {
   compile group: 'org.zeroturnaround', name: 'zt-exec', version: '1.10'
 
   // https://mvnrepository.com/artifact/com.google.guava/guava
-  compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
+  compile group: 'com.google.guava', name: 'guava', version: '27.1-jre'
 
   // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.0.RELEASE'

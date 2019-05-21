@@ -159,9 +159,9 @@ public class LxcService {
     cmds.lxcAttachCmd = String.format("lxc-attach -n %s --clear-env "
             + "-- bash -c 'echo nameserver 212.51.192.2 >> /etc/resolv.conf; "
             + "echo nameserver 8.8.8.8 >> /etc/resolv.conf; "
-            + "apt-get -y install openssh-server; useradd -m user; "
-            + "echo root:haslo123 | chpasswd; echo %s:%s | chpasswd; echo done'",
-        name, username, password);
+            + "apt-get -y install openssh-server; useradd -m %s; "
+            + "echo root:%s | chpasswd; echo %s:%s | chpasswd; echo done'",
+        name, username, password, username, password);
     cmds.lxcAttachCmdBash = new String[]{"/bin/bash", "-c", cmds.lxcAttachCmd};
     cmds.lxcStartCmd = String.format("lxc-start -n %s", name);
     cmds.lxcStopCmd = String.format("lxc-stop -n %s", name);

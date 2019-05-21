@@ -178,7 +178,7 @@ class UserLayoutContainer extends React.Component {
           <Drawer
               variant="permanent"
               classes={{
-                paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
+                form: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
               }}
               open={this.state.open}
           >
