@@ -14,6 +14,10 @@ import TableRow from "@material-ui/core/TableRow/TableRow";
 import TableCell from "@material-ui/core/TableCell/TableCell";
 import Table from "@material-ui/core/Table/Table";
 import TableBody from "@material-ui/core/TableBody/TableBody";
+import Dialog from "@material-ui/core/Dialog/Dialog";
+import DialogActions from "@material-ui/core/DialogActions/DialogActions";
+import DialogTitle from "@material-ui/core/DialogTitle/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent/DialogContent";
 
 const styles = theme => ({
   tableContainer: {
@@ -42,6 +46,7 @@ class LxcContainer extends React.Component {
     lxcUsername: '',
     lxcPassword: '',
     createFailed: false,
+    openDialog: false,
   };
 
   handleChange = name => event => {
@@ -60,12 +65,19 @@ class LxcContainer extends React.Component {
         lxcUsername: '',
         lxcPassword: '',
         createFailed: false,
+        openDialog: false,
       });
     }
   }
 
   sendCreate = () => {
     this.props.createLxc(this.state.lxcName, this.state.lxcUsername, this.state.lxcPassword);
+  };
+
+  handleClose = () => {
+    this.setState({
+      openDialog: true,
+    })
   };
 
   componentDidMount() {
@@ -130,6 +142,19 @@ class LxcContainer extends React.Component {
                 : t.admin.lxc.create
             }
           </Button>
+          <Dialog onClose={this.handleClose} open={this.state.openDialog}>
+            <DialogTitle id="customized-dialog-title" onClose={this.handleClose}>
+              Info
+            </DialogTitle>
+            <DialogContent>
+              LXC create job submitted
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.handleClose} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
 
         <br/><br/><br/>
