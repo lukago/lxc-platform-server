@@ -36,7 +36,7 @@ security:
   jwt:
     token:
       secret-key: secret-key
-      expire-length: 360000
+      expire-length: 36000000
 
 # sudo -u postgres -i
 # psql

@@ -2,20 +2,20 @@ package org.paas.lxc.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class ContainerDto {
+public class LxcStatusDto {
 
   @ApiModelProperty
-  private String name;
+  private String lxcStatus;
 
   @ApiModelProperty
   private UserSafeDto owner;
 
-  public String getName() {
-    return name;
+  public String getLxcStatus() {
+    return lxcStatus;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setLxcStatus(String lxcStatus) {
+    this.lxcStatus = lxcStatus;
   }
 
   public UserSafeDto getOwner() {

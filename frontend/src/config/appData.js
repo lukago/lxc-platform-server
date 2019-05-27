@@ -13,6 +13,7 @@ export const routes = {
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_USERS: '/admin/users',
   ADMIN_LXC: '/admin/lxc',
+  ADMIN_LXC_DETAILS: '/admin/lxc/:lxcName',
   CLIENT_DASHBOARD: '/client/dashboard',
   CLIENT_PROFILE: '/client/profile',
   LOGOUT: '/logout'

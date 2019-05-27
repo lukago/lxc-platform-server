@@ -29,6 +29,9 @@ public class ProcessLogger {
     while ((line = br.readLine()) != null) {
       log.info(line);
       sb.append(line);
+      if (!line.endsWith("\n")) {
+        sb.append("\n");
+      }
     }
 
     return sb.toString();

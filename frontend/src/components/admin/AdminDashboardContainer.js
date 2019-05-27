@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import Typography from '@material-ui/core/Typography';
-import UserLayoutContainer from "./AdminLayoutContainer";
+import AdminLayoutContainer from "./AdminLayoutContainer";
 import {withStyles} from "@material-ui/core";
 import {reactLocalStorage} from "reactjs-localstorage";
 import t from "../../locale/locale";
@@ -26,7 +26,7 @@ class AdminDashboardContainer extends React.Component {
     const { classes } = this.props;
 
     return (
-        <UserLayoutContainer>
+        <AdminLayoutContainer>
           <Typography variant="h4" gutterBottom component="h2">
             {t.admin.dashboard.accountData}
           </Typography>
@@ -41,7 +41,7 @@ class AdminDashboardContainer extends React.Component {
           <div className={classes.tableContainer}>
             {t.admin.dashboard.content}
           </div>
-        </UserLayoutContainer>
+        </AdminLayoutContainer>
     );
   }
 }

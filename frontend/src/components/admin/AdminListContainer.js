@@ -1,6 +1,6 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
-import UserLayoutContainer from "./AdminLayoutContainer";
+import AdminLayoutContainer from "./AdminLayoutContainer";
 import {withStyles} from "@material-ui/core";
 import t from "../../locale/locale";
 
@@ -17,14 +17,14 @@ const AdminListContainer = (props) => {
   const { classes } = props;
 
   return (
-      <UserLayoutContainer>
+      <AdminLayoutContainer>
         <Typography variant="h4" gutterBottom component="h2">
           {t.admin.list.userList}
         </Typography>
         <Typography component="div" className={classes.tableContainer}>
           {t.admin.list.content}
         </Typography>
-      </UserLayoutContainer>
+      </AdminLayoutContainer>
   );
 };
 

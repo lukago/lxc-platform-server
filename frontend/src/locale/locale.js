@@ -17,6 +17,13 @@ const en = {
     back: 'Back',
     cancel: 'Cancel',
   },
+  dialog: {
+    titleOk: 'Done',
+    contentOk: 'Action completed successfully',
+    titleFail: 'Failed',
+    contentFail: 'Action failed during request',
+    close: 'Close',
+  },
   login: {
     head: 'Sign in',
     username: 'Username',
@@ -52,6 +59,23 @@ const en = {
       name: 'Name',
       owner: 'Owner username',
       unasigned: '-',
+      info: 'Info',
+      jobInfo: 'LXC create job submitted',
+      close: 'Close',
+      details: {
+        header: 'LXC details',
+        actions: {
+          assign: 'Assing user to container',
+          unassign: 'Unassign from container',
+          start: 'Start container',
+          stop: 'Stop container',
+        },
+        username: 'Username',
+        assign: 'Assign',
+        start: 'Start',
+        stop: 'Stop',
+        unassing: 'Unassign',
+      }
     }
   },
   user: {

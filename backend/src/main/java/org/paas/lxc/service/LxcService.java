@@ -9,6 +9,7 @@ import org.paas.lxc.exception.HttpException;
 import org.paas.lxc.model.Container;
 import org.paas.lxc.model.Job;
 import org.paas.lxc.model.JobStatus;
+import org.paas.lxc.model.LxcStatus;
 import org.paas.lxc.model.User;
 import org.paas.lxc.respository.ContainerRepository;
 import org.paas.lxc.respository.JobRepository;
@@ -73,6 +74,16 @@ public class LxcService {
     containerRepository.save(container);
   }
 
+  @Transactional
+  public void unassignLxcFromUser(String lxcName) {
+    Container container = containerRepository
+        .findByName(lxcName)
+        .orElseThrow(() -> new HttpException("Container for given name not found", HttpStatus.NOT_FOUND));
+
+    container.setOwner(null);
+    containerRepository.save(container);
+  }
+
   public List<Container> getAllContainers() {
     return containerRepository.findAll();
   }
@@ -90,13 +101,19 @@ public class LxcService {
     return runProcess(cmd);
   }
 
-  public String getLxcStatus(String lxcName) {
+  public LxcStatus getLxcStatus(String lxcName) {
     Container container = containerRepository
         .findByName(lxcName)
         .orElseThrow(() -> new HttpException("Container for name not found", HttpStatus.NOT_FOUND));
 
     String cmd = String.format("lxc-info -n %s", container.getName());
-    return runProcess(cmd);
+    String statusRes = runProcess(cmd);
+
+    LxcStatus lxcStatus = new LxcStatus();
+    lxcStatus.setStatusResult(statusRes);
+    lxcStatus.setOwner(container.getOwner());
+
+    return lxcStatus;
   }
 
   public String startLxcForUser(User user, String lxcName) {

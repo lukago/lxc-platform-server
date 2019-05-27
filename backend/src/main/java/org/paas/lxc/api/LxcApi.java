@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.paas.lxc.dto.ContainerDto;
 import org.paas.lxc.dto.JobDto;
 import org.paas.lxc.dto.LxcCreateDto;
+import org.paas.lxc.dto.LxcStatusDto;
 import org.paas.lxc.model.Job;
 import org.paas.lxc.service.LxcService;
 import org.slf4j.Logger;
@@ -90,6 +91,20 @@ public class LxcApi {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  @PostMapping
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @ApiOperation(value = "")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Something went wrong"),
+  })
+  @RequestMapping("/{lxcName}/unassign")
+  public ResponseEntity<Void> unassingLxcFromUser(
+      @ApiParam("lxcName") @PathVariable String lxcName
+  ) {
+    lxcService.unassignLxcFromUser(lxcName);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
   @GetMapping
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ApiOperation(value = "")
@@ -131,6 +146,19 @@ public class LxcApi {
   ) {
     String res = lxcService.stopLxc(lxcName);
     return new ResponseEntity<>(res, HttpStatus.OK);
+  }
+
+  @GetMapping(value = "/{lxcName}/status")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @ApiOperation(value = "", response = String.class)
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Something went wrong"),
+      @ApiResponse(code = 403, message = "Access denied"),
+      @ApiResponse(code = 500, message = "Expired or invalid JWT token")
+  })
+  public ResponseEntity<LxcStatusDto> getLxcStatus(@PathVariable String lxcName) {
+    LxcStatusDto statusDto = modelMapper.map(lxcService.getLxcStatus(lxcName), LxcStatusDto.class);
+    return new ResponseEntity<>(statusDto, HttpStatus.OK);
   }
 
   @MessageMapping("sc/jobs")

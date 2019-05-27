@@ -31,11 +31,11 @@ public class JwtTokenProvider {
 
   private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-  @Value("${security.jwt.token.secret-key:secret-key}")
+  @Value("${security.jwt.token.secret-key}")
   private String secretKey;
 
-  @Value("${security.jwt.token.expire-length:3600000}")
-  private long validityInMilliseconds = 3600000; // 1h
+  @Value("${security.jwt.token.expire-length}")
+  private long validityInMilliseconds;
 
   @Autowired
   private MyUserDetails myUserDetails;
@@ -46,10 +46,10 @@ public class JwtTokenProvider {
   }
 
   public String createToken(String username, List<Role> roles) {
-
     Claims claims = Jwts.claims().setSubject(username);
-    claims.put("auth", roles.stream().map(s -> new SimpleGrantedAuthority(s.getAuthority()))
-        .filter(Objects::nonNull).collect(Collectors.toList()));
+    claims.put("auth", roles.stream()
+        .map(s -> new SimpleGrantedAuthority(s.getAuthority()))
+        .collect(Collectors.toList()));
 
     Date now = new Date();
     Date validity = new Date(now.getTime() + validityInMilliseconds);
