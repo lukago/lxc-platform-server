@@ -2,10 +2,8 @@
 .idea
 *.iml
 
-# gradle
-.gradle
-build
-out
+# maven
+target/
 
 # MacOS
 .DS_Store

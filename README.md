@@ -1,4 +1,4 @@
-# Spring boot and react hot starter
+# lxc-platform-server
 
-[![Build Status](https://travis-ci.com/lukago/lxc-platform.svg?token=tsv9JMKpCY8piyBJajzn&branch=master)](https://travis-ci.com/lukago/lxc-platform)
+[![Build Status](https://travis-ci.com/lukago/lxc-platform-server.svg?token=tsv9JMKpCY8piyBJajzn&branch=master)](https://travis-ci.com/lukago/lxc-platform-server)
 
