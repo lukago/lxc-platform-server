@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.lxc.platform.dto.ContainerDto;
+import org.lxc.platform.dto.LxcStatusDto;
 import org.lxc.platform.service.LxcService;
 import org.lxc.platform.service.UserService;
 import org.modelmapper.ModelMapper;
@@ -122,8 +123,10 @@ public class UserApi {
       @ApiResponse(code = 403, message = "Access denied"),
       @ApiResponse(code = 500, message = "Expired or invalid JWT token")
   })
-  public ResponseEntity<String> getLxcStatus(HttpServletRequest req, @PathVariable String lxcName) {
-    String status = lxcService.getLxcStatusForUser(userService.whoami(req), lxcName);
+  public ResponseEntity<LxcStatusDto> getLxcStatus(HttpServletRequest req, @PathVariable String lxcName) {
+    LxcStatusDto status = modelMapper.map(
+        lxcService.getLxcStatusForUser(userService.whoami(req), lxcName),
+        LxcStatusDto.class);
 
     return new ResponseEntity<>(status, HttpStatus.OK);
   }

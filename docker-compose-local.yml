@@ -1,0 +1,53 @@
+version: '3.7'
+
+networks:
+  lxc-backend:
+  lxc-frontend:
+
+services:
+  postgresdb:
+    image: postgres:12-alpine
+    networks:
+      - lxc-backend
+    container_name: postgresdb
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgrespwd
+      POSTGRES_USER: postgresuser
+      POSTGRES_DB: lxcdb
+    volumes:
+      - /var/lxcdata/db:/var/lib/postgresql/data:rw
+    ports:
+      - "5432:5432"
+
+  lxc-platform-server:
+    image: lxc-platform-server:latest
+    networks:
+      - lxc-backend
+      - lxc-frontend
+    hostname: lxc-platform-server
+    container_name: lxc-platform-server
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_ADDRESS: postgresdb
+      JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:7779
+      LOG_LEVEL: DEBUG
+      DB_CONT_NAME: postgresdb
+      DB_PORT: 5432
+      DB_NAME: lxcdb
+      DB_USER: postgresuser
+      DB_PASSWORD: postgrespwd
+      LXC_SERVER_PORT: 8081
+      JWT_SECRET: jwtsupersecretkey
+      WEBUI_URL: http://localhost:3003
+      SSH_SERVER_IP: 172.17.0.1
+      SSH_SERVER_PORT: 22
+      SSH_SERVER_KEY: admin.key
+      SSH_SERVER_USERNAME: admin
+      SSH_SERVER_PASSWORD: 1324111a
+      SSH_SERVER_LXC_PARENT: cont001
+      SSH_LXC_PORT: 22
+    ports:
+      - "8081:8081"
+      - "7779:7779"
+      - "5022:22"

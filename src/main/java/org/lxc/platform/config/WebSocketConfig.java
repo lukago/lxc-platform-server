@@ -3,6 +3,7 @@ package org.lxc.platform.config;
 import org.lxc.platform.exception.HttpException;
 import org.lxc.platform.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
@@ -25,6 +26,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   @Autowired
   JwtTokenProvider jwtTokenProvider;
 
+  @Value("${cors.allowedOrigins}")
+  String allowedOrigins;
+
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
     config.enableSimpleBroker("/sc/topic");
@@ -35,7 +39,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry
         .addEndpoint("/sc/lxcplatform")
-        .setAllowedOrigins("http://localhost:3000")
+        .setAllowedOrigins(allowedOrigins)
         .withSockJS();
   }
 

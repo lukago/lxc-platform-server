@@ -10,6 +10,12 @@ public class LxcStatusDto {
   @ApiModelProperty
   private UserSafeDto owner;
 
+  @ApiModelProperty
+  private int port;
+
+  @ApiModelProperty
+  private String name;
+
   public String getLxcStatus() {
     return lxcStatus;
   }
@@ -24,5 +30,21 @@ public class LxcStatusDto {
 
   public void setOwner(UserSafeDto owner) {
     this.owner = owner;
+  }
+
+  public int getPort() {
+    return port;
+  }
+
+  public void setPort(int port) {
+    this.port = port;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 }

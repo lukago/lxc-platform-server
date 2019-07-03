@@ -10,6 +10,8 @@ import org.lxc.platform.dto.UserDto;
 import org.lxc.platform.dto.UserUpdateDto;
 import org.lxc.platform.exception.HttpException;
 import org.lxc.platform.security.JwtTokenProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,17 +24,21 @@ import org.lxc.platform.respository.UserRepository;
 @Service
 public class UserService {
 
-  @Autowired
-  private UserRepository userRepository;
+  private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
+
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final AuthenticationManager authenticationManager;
 
   @Autowired
-  private PasswordEncoder passwordEncoder;
-
-  @Autowired
-  private JwtTokenProvider jwtTokenProvider;
-
-  @Autowired
-  private AuthenticationManager authenticationManager;
+  public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+      JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager) {
+    this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.jwtTokenProvider = jwtTokenProvider;
+    this.authenticationManager = authenticationManager;
+  }
 
   public String signin(String username, String password) {
     try {
@@ -47,6 +53,7 @@ public class UserService {
   @Transactional
   public User signup(UserDto user) {
     if (!user.getPassword().equals(user.getPasswordRetype())) {
+      LOG.info("Passwords do not match");
       throw new HttpException("Passwords do not match", HttpStatus.UNPROCESSABLE_ENTITY);
     }
 

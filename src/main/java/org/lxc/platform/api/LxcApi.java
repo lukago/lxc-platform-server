@@ -68,8 +68,7 @@ public class LxcApi {
 
     lxcService.create(
         lxcCreateDto.getName(),
-        lxcCreateDto.getUsername(),
-        lxcCreateDto.getPassword(),
+        Integer.valueOf(lxcCreateDto.getPort()),
         processor
     );
 

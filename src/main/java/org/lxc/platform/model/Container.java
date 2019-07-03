@@ -21,6 +21,9 @@ public class Container {
   @Column(unique = true, nullable = false)
   private String name;
 
+  @Column(unique = true, nullable = false)
+  private Integer port;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "owner_id")
   private User owner;
@@ -39,6 +42,14 @@ public class Container {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public int getPort() {
+    return port;
+  }
+
+  public void setPort(Integer port) {
+    this.port = port;
   }
 
   public User getOwner() {

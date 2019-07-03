@@ -5,13 +5,16 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.List;
 import org.lxc.platform.dto.SiginResponseDto;
 import org.lxc.platform.dto.UserDto;
 import org.lxc.platform.dto.UserSafeDto;
+import org.lxc.platform.model.Role;
 import org.lxc.platform.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.lxc.platform.dto.CredentialsDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,11 +28,26 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "auth")
 public class AuthApi {
 
-  @Autowired
   private UserService userService;
+  private ModelMapper modelMapper;
+
+  @Value("${security.init.create-admin}")
+  private boolean createAdmin;
+
 
   @Autowired
-  private ModelMapper modelMapper;
+  public AuthApi(ModelMapper modelMapper, UserService userService) {
+    this.modelMapper = modelMapper;
+    this.userService = userService;
+
+//    UserDto userDto = new UserDto();
+//    userDto.setUsername("admin");
+//    userDto.setEmail("admin@adminlxc.org");
+//    userDto.setRoles(List.of(Role.ROLE_ADMIN, Role.ROLE_CLIENT));
+//    userDto.setPassword("password");
+//    userDto.setPasswordRetype("password");
+//    signup(userDto);
+  }
 
   @PostMapping("/signin")
   @ApiOperation(value = "")

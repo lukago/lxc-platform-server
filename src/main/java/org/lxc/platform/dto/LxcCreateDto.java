@@ -8,10 +8,8 @@ public class LxcCreateDto {
   private String name;
 
   @ApiModelProperty
-  private String username;
+  private String port;
 
-  @ApiModelProperty
-  private String password;
 
   public String getName() {
     return name;
@@ -21,19 +19,11 @@ public class LxcCreateDto {
     this.name = name;
   }
 
-  public String getUsername() {
-    return username;
+  public String getPort() {
+    return port;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
+  public void setPort(String port) {
+    this.port = port;
   }
 }

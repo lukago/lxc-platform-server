@@ -8,6 +8,9 @@ public class ContainerDto {
   private String name;
 
   @ApiModelProperty
+  private String port;
+
+  @ApiModelProperty
   private UserSafeDto owner;
 
   public String getName() {
@@ -24,5 +27,13 @@ public class ContainerDto {
 
   public void setOwner(UserSafeDto owner) {
     this.owner = owner;
+  }
+
+  public String getPort() {
+    return port;
+  }
+
+  public void setPort(String port) {
+    this.port = port;
   }
 }
