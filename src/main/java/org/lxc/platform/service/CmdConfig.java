@@ -39,17 +39,11 @@ public class CmdConfig implements ICmdConfig {
   @Value("${lxc.stop}")
   private String stopCmd;
 
-  @Value("${lxc.getIp}")
-  private String getIpCmd;
-
   @Value("${lxc.info}")
   private String infoCmd;
 
-  @Value("${lxc.sudo}")
-  private String sudoCmd;
-
-  @Value("${lxc.setIpTableRouting}")
-  private String setIpTableRoutingCmd;
+  @Value("${lxc.routing}")
+  private String routingCmd;
 
   public String getServerIp() {
     return serverIp;
@@ -95,19 +89,12 @@ public class CmdConfig implements ICmdConfig {
     return stopCmd;
   }
 
-  public String getGetIpCmd() {
-    return getIpCmd;
-  }
-
-  public String getSetIpTableRoutingCmd() {
-    return setIpTableRoutingCmd;
-  }
-
   public String getInfoCmd() {
     return infoCmd;
   }
 
-  public String getSudoCmd() {
-    return sudoCmd;
+  @Override
+  public String getRoutingCmd() {
+    return routingCmd;
   }
 }

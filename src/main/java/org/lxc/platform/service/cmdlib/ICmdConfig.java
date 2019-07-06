@@ -23,11 +23,7 @@ public interface ICmdConfig {
 
   String getStopCmd();
 
-  String getGetIpCmd();
-
-  String getSetIpTableRoutingCmd();
+  String getRoutingCmd();
 
   String getInfoCmd();
-
-  String getSudoCmd();
 }

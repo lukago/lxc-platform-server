@@ -31,22 +31,10 @@ public class AuthApi {
   private UserService userService;
   private ModelMapper modelMapper;
 
-  @Value("${security.init.create-admin}")
-  private boolean createAdmin;
-
-
   @Autowired
   public AuthApi(ModelMapper modelMapper, UserService userService) {
     this.modelMapper = modelMapper;
     this.userService = userService;
-
-//    UserDto userDto = new UserDto();
-//    userDto.setUsername("admin");
-//    userDto.setEmail("admin@adminlxc.org");
-//    userDto.setRoles(List.of(Role.ROLE_ADMIN, Role.ROLE_CLIENT));
-//    userDto.setPassword("password");
-//    userDto.setPasswordRetype("password");
-//    signup(userDto);
   }
 
   @PostMapping("/signin")

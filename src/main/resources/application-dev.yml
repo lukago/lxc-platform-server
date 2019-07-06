@@ -33,20 +33,16 @@ security:
     token:
       secret-key: ${JWT_SECRET}
       expire-length: 36000000
-  init:
-    create-admin: true
 
 cors:
   allowedOrigins: ${WEBUI_URL}
 
 lxc:
-  copy: lxc-copy -n %s -N %s
-  start: lxc-start -n %s
-  stop: lxc-stop -n %s
-  getIp: lxc-info -n %s -iH
-  info: lxc-info -n %s
-  sudo: echo %s | sudo -S %s
-  setIpTableRouting: iptables -t nat -A PREROUTING -i eth0 -p tcp --dport %s -j DNAT --to %s:%s
+  copy: lxc copy %s %s
+  start: lxc start %s
+  stop: lxc stop %s
+  info: lxc info %s
+  routing: lxc config device add %s %s_ssh proxy listen=tcp:0.0.0.0:%s connect=tcp:localhost:%s
   cmdRunner: sshpwd
 
 ssh:

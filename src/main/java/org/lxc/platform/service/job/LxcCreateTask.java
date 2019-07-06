@@ -56,13 +56,7 @@ public class LxcCreateTask implements JobTask {
 
     try {
       cmdRunner.run(String.format(cmdData.getCopyCmd(), cmdData.getParentName(), name));
-      cmdRunner.run(String.format(cmdData.getStartCmd(), name));
-      String ip = cmdRunner.run(String.format(cmdData.getGetIpCmd(), name));
-      cmdRunner.run(String.format(cmdData.getStopCmd(), name));
-
-      String cmd = String.format(cmdData.getSetIpTableRoutingCmd(), port, ip, cmdData.getLxcPort());
-      String sudoCmd = String.format(cmdData.getSudoCmd(), cmdData.getPassword(), cmd);
-      cmdRunner.run(sudoCmd);
+      cmdRunner.run(String.format(cmdData.getRoutingCmd(), name, name, port, cmdData.getLxcPort()));
 
       Container container = new Container();
       container.setName(name);
