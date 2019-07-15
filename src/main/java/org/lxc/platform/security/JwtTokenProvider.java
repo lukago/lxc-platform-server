@@ -9,10 +9,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import org.lxc.platform.model.Role;
 import org.lxc.platform.exception.HttpException;
+import org.lxc.platform.model.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,20 +27,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtTokenProvider {
 
-  private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-  @Value("${security.jwt.token.secret-key}")
-  private String secretKey;
-
-  @Value("${security.jwt.token.expire-length}")
-  private long validityInMilliseconds;
+  private final String secretKey;
+  private final long validityInMilliseconds;
+  private final MyUserDetails myUserDetails;
 
   @Autowired
-  private MyUserDetails myUserDetails;
-
-  @PostConstruct
-  protected void init() {
-    secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+  public JwtTokenProvider(
+      MyUserDetails myUserDetails,
+      @Value("${security.jwt.token.expireLength}") long validityInMilliseconds,
+      @Value("${security.jwt.token.secretKey}") String secretKey) {
+    this.myUserDetails = myUserDetails;
+    this.validityInMilliseconds = validityInMilliseconds;
+    this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
   }
 
   public String createToken(String username, List<Role> roles) {
@@ -95,7 +94,7 @@ public class JwtTokenProvider {
       Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
       return true;
     } catch (JwtException | IllegalArgumentException e) {
-      log.info("Exception in jwt token provider when validation: {}", e);
+      LOG.info("Exception in jwt token provider when validation: {}", e);
       throw new HttpException("Expired or invalid JWT token", HttpStatus.UNAUTHORIZED);
     }
   }

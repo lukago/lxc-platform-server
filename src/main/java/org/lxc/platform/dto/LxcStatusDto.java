@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class LxcStatusDto {
 
   @ApiModelProperty
-  private String lxcStatus;
+  private String statusResult;
 
   @ApiModelProperty
   private UserSafeDto owner;
@@ -16,12 +16,12 @@ public class LxcStatusDto {
   @ApiModelProperty
   private String name;
 
-  public String getLxcStatus() {
-    return lxcStatus;
+  public String getStatusResult() {
+    return statusResult;
   }
 
-  public void setLxcStatus(String lxcStatus) {
-    this.lxcStatus = lxcStatus;
+  public void setLxcStatus(String statusResult) {
+    this.statusResult = statusResult;
   }
 
   public UserSafeDto getOwner() {

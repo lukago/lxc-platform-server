@@ -6,13 +6,14 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
+import org.lxc.platform.dto.CredentialsDto;
 import org.lxc.platform.dto.SiginResponseDto;
 import org.lxc.platform.dto.UserDto;
 import org.lxc.platform.dto.UserSafeDto;
 import org.lxc.platform.model.Role;
 import org.lxc.platform.service.UserService;
-import org.modelmapper.ModelMapper;
-import org.lxc.platform.dto.CredentialsDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -28,13 +29,30 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "auth")
 public class AuthApi {
 
+  private static final Logger LOG = LoggerFactory.getLogger(AuthApi.class);
+
   private UserService userService;
-  private ModelMapper modelMapper;
 
   @Autowired
-  public AuthApi(ModelMapper modelMapper, UserService userService) {
-    this.modelMapper = modelMapper;
+  public AuthApi(
+      UserService userService,
+      @Value("${init.addAdmin}") boolean addAdmin) {
     this.userService = userService;
+
+    if (addAdmin) {
+      UserDto userDto = new UserDto();
+      userDto.setUsername("admin");
+      userDto.setEmail("admin@adminlxc.org");
+      userDto.setRoles(List.of(Role.ROLE_ADMIN, Role.ROLE_CLIENT));
+      userDto.setPassword("password");
+      userDto.setPasswordRetype("password");
+
+      try {
+        signup(userDto);
+      } catch (Exception e) {
+        LOG.warn("Creation of initial admin user failed. Skipping...");
+      }
+    }
   }
 
   @PostMapping("/signin")
@@ -61,7 +79,7 @@ public class AuthApi {
       @ApiResponse(code = 412, message = "Expired or invalid JWT token")
   })
   public ResponseEntity<UserSafeDto> signup(@ApiParam("Signup User") @RequestBody UserDto user) {
-    return new ResponseEntity<>(modelMapper.map(userService.signup(user), UserSafeDto.class), HttpStatus.OK);
+    return new ResponseEntity<>(userService.signup(user), HttpStatus.OK);
   }
 
 }

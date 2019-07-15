@@ -2,60 +2,51 @@ package org.lxc.platform.service.job;
 
 import java.util.Date;
 import java.util.UUID;
+import java.util.function.Supplier;
 import org.lxc.platform.dto.JobDto;
-import org.lxc.platform.model.Container;
 import org.lxc.platform.model.Job;
 import org.lxc.platform.model.JobCode;
 import org.lxc.platform.model.JobStatus;
 import org.lxc.platform.model.LxcStatus;
 import org.lxc.platform.model.User;
-import org.lxc.platform.respository.ContainerRepository;
 import org.lxc.platform.respository.JobRepository;
 import org.lxc.platform.respository.LxcStatusRepository;
-import org.lxc.platform.service.cmdlib.ICmdConfig;
-import org.lxc.platform.service.cmdlib.ICmdRunner;
 import org.lxc.platform.service.flow.IProcessor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LxcCreateTask implements JobTask {
+public class LxcGenericTask<T extends LxcStatus> implements JobTask {
 
   private final static Logger LOG = LoggerFactory.getLogger(LxcCreateTask.class);
 
-  private final ICmdRunner cmdRunner;
   private final IProcessor<JobDto> processor;
   private final JobRepository jobRepository;
   private final LxcStatusRepository lxcStatusRepository;
-  private final ContainerRepository containerRepository;
-  private final ICmdConfig cmdData;
-  private final String name;
-  private final int port;
-  private final String jobKey;
+  private final String description;
+  private final Supplier<T> supplier;
+  private final JobCode jobCode;
   private final User createdBy;
+  private final String jobKey;
   private final ModelMapper modelMapper;
 
-  public LxcCreateTask(
-      ICmdRunner cmdRunner,
+  public LxcGenericTask(
       IProcessor<JobDto> processor,
       JobRepository jobRepository,
       LxcStatusRepository lxcStatusRepository,
-      ContainerRepository containerRepository,
-      ICmdConfig cmdData,
       ModelMapper modelMapper,
-      String name,
+      String description,
+      JobCode jobCode,
       User createdBy,
-      int port) {
-    this.cmdRunner = cmdRunner;
+      Supplier<T> supplier) {
     this.processor = processor;
     this.jobRepository = jobRepository;
     this.lxcStatusRepository = lxcStatusRepository;
-    this.containerRepository = containerRepository;
-    this.cmdData = cmdData;
-    this.name = name;
-    this.port = port;
+    this.description = description;
     this.createdBy = createdBy;
+    this.supplier = supplier;
     this.jobKey = UUID.randomUUID().toString();
+    this.jobCode = jobCode;
     this.modelMapper = modelMapper;
   }
 
@@ -65,38 +56,28 @@ public class LxcCreateTask implements JobTask {
   }
 
   @Override
-  public LxcStatus run() {
+  public T run() {
     Job job = new Job();
     job.setStartDate(new Date());
     job.setKey(jobKey);
+    job.setJobCode(jobCode);
     job.setJobStatus(JobStatus.STARTED);
-    job.setJobCode(JobCode.CREATE);
-    job.setDescription("CreateLxcJob: " + name + ", port: " + port);
+    job.setDescription(description);
     job.setCreatedBy(createdBy);
     Job startedJob = jobRepository.save(job);
     processor.onNext(modelMapper.map(startedJob, JobDto.class));
 
     try {
-      cmdRunner.run(String.format(cmdData.getCopyCmd(), cmdData.getParentName(), name));
-      cmdRunner.run(String.format(cmdData.getRoutingCmd(), name, name, port, cmdData.getLxcPort()));
-
-      Container container = new Container();
-      container.setName(name);
-      container.setPort(port);
-      containerRepository.save(container);
-
-      LxcStatus lxcStatus = new LxcStatus();
-      lxcStatus.setStatusResult("done");
-      LxcStatus savedLxcStatus = lxcStatusRepository.save(lxcStatus);
-
+      T result = supplier.get();
+      LxcStatus savedLxcStatus = lxcStatusRepository.save(result);
       startedJob.setJobStatus(JobStatus.DONE);
       startedJob.setEndDate(new Date());
       startedJob.setResult(savedLxcStatus);
-      Job doneJob = jobRepository.save(job);
+      Job doneJob = jobRepository.save(startedJob);
       processor.onNext(modelMapper.map(doneJob, JobDto.class));
-      return savedLxcStatus;
+      return result;
     } catch (Exception e) {
-      LOG.info("Job exception: {}", e);
+      LOG.info("Generic job exception in {}: {}", jobCode, e.getMessage());
       LxcStatus lxcStatus = new LxcStatus();
       lxcStatus.setStatusResult("failed");
       LxcStatus savedLxcStatus = lxcStatusRepository.save(lxcStatus);
@@ -105,9 +86,7 @@ public class LxcCreateTask implements JobTask {
       startedJob.setResult(savedLxcStatus);
       Job failedJob = jobRepository.save(startedJob);
       processor.onNext(modelMapper.map(failedJob, JobDto.class));
-      throw new IllegalThreadStateException("Lxc create job exception: " + e.getMessage());
+      throw new IllegalThreadStateException(jobCode + " exception: " + e.getMessage());
     }
-
   }
-
 }

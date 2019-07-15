@@ -17,7 +17,7 @@ import org.springframework.web.context.request.WebRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandlerController {
 
-  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandlerController.class);
+  private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandlerController.class);
 
   @Bean
   public ErrorAttributes errorAttributes() {
@@ -37,19 +37,19 @@ public class GlobalExceptionHandlerController {
 
   @ExceptionHandler(HttpException.class)
   public void handleCustomException(HttpServletResponse res, HttpException ex) throws IOException {
-    log.info("Sending error HttpException caucht: {}", ex);
+    LOG.info("Sending error HttpException caucht: {}", ex);
     res.sendError(ex.getHttpStatus().value(), ex.getMessage());
   }
 
   @ExceptionHandler(AccessDeniedException.class)
   public void handleAccessDeniedException(HttpServletResponse res) throws IOException {
-    log.info("Sending error AccessDeniedException caucht");
+    LOG.info("Sending error AccessDeniedException caucht");
     res.sendError(HttpStatus.FORBIDDEN.value(), "Access denied");
   }
 
   @ExceptionHandler(Exception.class)
   public void handleException(HttpServletResponse res) throws IOException {
-    log.info("Sending error Exception caucht");
+    LOG.info("Sending error Exception caucht");
     res.sendError(HttpStatus.BAD_REQUEST.value(), "Something went wrong");
   }
 

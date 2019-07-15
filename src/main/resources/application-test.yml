@@ -4,14 +4,14 @@ spring:
     showSql: true
     generateDdl: true
     hibernate:
-      ddlAuto: update
+      ddlAuto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        hbm2ddl.auto: update
+        hbm2ddl.auto: create-drop
         ejb.naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
         show_sql: true
-        format_sql: false
+        format_sql: true
   datasource:
     platform: postgres
     url: jdbc:postgresql://${DB_CONT_NAME}:${DB_PORT}/${DB_NAME}
@@ -38,30 +38,19 @@ security:
   jwt:
     token:
       secretKey: ${JWT_SECRET}
-      expireLength: 36000000
+      expireLength: 36000
 
 cors:
-  allowedOrigins: ${WEBUI_URL}
+  allowedOrigins: '*'
 
 lxc:
-  copy: lxc copy %s %s
-  start: lxc start %s
-  stop: lxc stop %s
-  info: lxc info %s
-  routing: lxc config device add %s %s_ssh proxy listen=tcp:0.0.0.0:%s connect=tcp:localhost:%s
-  cmdRunner: sshpwd
-
-ssh:
-  server:
-    ip: ${SSH_SERVER_IP}
-    port: ${SSH_SERVER_PORT}
-    key: ${SSH_SERVER_KEY}
-    username: ${SSH_SERVER_USERNAME}
-    password: ${SSH_SERVER_PASSWORD}
-    parentName: ${SSH_SERVER_LXC_PARENT}
-  lxc:
-    port: ${SSH_LXC_PORT}
+  copy: echo %s %s
+  start: echo %s
+  stop: echo %s
+  info: echo info %s
+  routing: echo config device add %s %s_ssh proxy listen=tcp:0.0.0.0:%s connect=tcp:localhost:%s
+  cmdRunner: mock
 
 init:
-  addAdmin: true
-  threadPoolSize: 3
+  addAdmin: false
+  threadPoolSize: 2

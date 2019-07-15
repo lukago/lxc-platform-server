@@ -1,13 +1,13 @@
-package org.lxc.platform.api;
+package org.lxc.platform.service;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-class AuthApiTest {
+class LxcServiceTest {
 
   @Test
-  void signTest() {
+  void createContainerTest() {
     assertTrue(true);
   }
 

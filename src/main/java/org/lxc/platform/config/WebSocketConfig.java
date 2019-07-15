@@ -23,16 +23,22 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-  @Autowired
-  JwtTokenProvider jwtTokenProvider;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final String allowedOrigins;
 
-  @Value("${cors.allowedOrigins}")
-  String allowedOrigins;
+  @Autowired
+  public WebSocketConfig(
+      JwtTokenProvider jwtTokenProvider,
+      @Value("${cors.allowedOrigins}") String allowedOrigins) {
+    this.jwtTokenProvider = jwtTokenProvider;
+    this.allowedOrigins = allowedOrigins;
+  }
 
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
     config.enableSimpleBroker("/sc/topic");
     config.setApplicationDestinationPrefixes("/app");
+    config.setUserDestinationPrefix("/user");
   }
 
   @Override

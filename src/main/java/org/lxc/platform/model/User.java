@@ -1,5 +1,6 @@
 package org.lxc.platform.model;
 
+import com.google.common.base.Objects;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -13,12 +14,12 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Entity
-@Table(name="Users")
+@Table(name="table_users")
 public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+  private Long id;
 
   @ElementCollection(fetch = FetchType.EAGER)
   private List<Role> roles;
@@ -36,11 +37,14 @@ public class User {
   @OneToMany(mappedBy = "owner")
   private List<Container> containers;
 
-  public Integer getId() {
+  @OneToMany(mappedBy = "createdBy")
+  private List<Job> jobs;
+
+  public Long getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
@@ -82,5 +86,40 @@ public class User {
 
   public void setContainers(List<Container> containers) {
     this.containers = containers;
+  }
+
+  public List<Job> getJobs() {
+    return jobs;
+  }
+
+  public void setJobs(List<Job> jobs) {
+    this.jobs = jobs;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    User user = (User) o;
+    return Objects.equal(id, user.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "User{" +
+        "id=" + id +
+        ", roles=" + roles +
+        ", username='" + username + '\'' +
+        ", email='" + email + '\'' +
+        '}';
   }
 }

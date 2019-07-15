@@ -6,16 +6,14 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.lxc.platform.dto.ContainerDto;
 import org.lxc.platform.dto.LxcStatusDto;
-import org.lxc.platform.service.LxcService;
-import org.lxc.platform.service.UserService;
-import org.modelmapper.ModelMapper;
 import org.lxc.platform.dto.PasswordDto;
 import org.lxc.platform.dto.UserSafeDto;
 import org.lxc.platform.dto.UserUpdateDto;
+import org.lxc.platform.service.LxcService;
+import org.lxc.platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +31,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "users")
 public class UserApi {
 
-  @Autowired
-  private UserService userService;
+  private final UserService userService;
+  private final LxcService lxcService;
 
   @Autowired
-  private ModelMapper modelMapper;
-
-  @Autowired
-  private LxcService lxcService;
+  public UserApi(UserService userService, LxcService lxcService) {
+    this.userService = userService;
+    this.lxcService = lxcService;
+  }
 
   @GetMapping(value = "")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -52,11 +50,8 @@ public class UserApi {
       @ApiResponse(code = 412, message = "Expired or invalid JWT token")
   })
   public ResponseEntity<List<UserSafeDto>> getAll() {
-    List<UserSafeDto> userDtos = userService.getAll().stream()
-        .map(user -> modelMapper.map(user, UserSafeDto.class))
-        .collect(Collectors.toList());
-
-    return new ResponseEntity<>(userDtos, HttpStatus.OK);
+    var userDtoList = userService.getAll();
+    return new ResponseEntity<>(userDtoList, HttpStatus.OK);
   }
 
   @DeleteMapping(value = "/{username}")
@@ -82,8 +77,9 @@ public class UserApi {
       @ApiResponse(code = 404, message = "The user doesn't exist"),
       @ApiResponse(code = 500, message = "Expired or invalid JWT token")
   })
-  public UserSafeDto search(@ApiParam("Username") @PathVariable String username) {
-    return modelMapper.map(userService.search(username), UserSafeDto.class);
+  public ResponseEntity<UserSafeDto> search(@ApiParam("Username") @PathVariable String username) {
+    var user = userService.getUser(username);
+    return new ResponseEntity<>(user, HttpStatus.OK);
   }
 
   @GetMapping(value = "/me")
@@ -95,7 +91,7 @@ public class UserApi {
       @ApiResponse(code = 500, message = "Expired or invalid JWT token")
   })
   public ResponseEntity<UserSafeDto> whoami(HttpServletRequest req) {
-    return new ResponseEntity<>(modelMapper.map(userService.whoami(req), UserSafeDto.class), HttpStatus.OK);
+    return new ResponseEntity<>(userService.whoami(req), HttpStatus.OK);
   }
 
   @GetMapping(value = "/me/lxc")
@@ -107,11 +103,7 @@ public class UserApi {
       @ApiResponse(code = 500, message = "Expired or invalid JWT token")
   })
   public ResponseEntity<List<ContainerDto>> getLxcsForUser(HttpServletRequest req) {
-    var containers = lxcService.getUserContainers(userService.whoami(req))
-        .stream()
-        .map(cont -> modelMapper.map(cont, ContainerDto.class))
-        .collect(Collectors.toList());
-
+    var containers = lxcService.getUserContainers(userService.whoamiInner(req));
     return new ResponseEntity<>(containers, HttpStatus.OK);
   }
 
@@ -124,11 +116,9 @@ public class UserApi {
       @ApiResponse(code = 500, message = "Expired or invalid JWT token")
   })
   public ResponseEntity<LxcStatusDto> getLxcStatus(HttpServletRequest req, @PathVariable String lxcName) {
-    LxcStatusDto status = modelMapper.map(
-        lxcService.getLxcStatusForUser(userService.whoami(req), lxcName),
-        LxcStatusDto.class);
 
-    return new ResponseEntity<>(status, HttpStatus.OK);
+    lxcService.getLxcStatus(userService.whoamiInner(req), lxcName);
+    return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
 
   @PostMapping
@@ -142,8 +132,8 @@ public class UserApi {
       HttpServletRequest req,
       @ApiParam("lxcName") @PathVariable String lxcName
   ) {
-    String res = lxcService.startLxcForUser(userService.whoami(req), lxcName);
-    return new ResponseEntity<>(res, HttpStatus.OK);
+    lxcService.startLxc(userService.whoamiInner(req), lxcName);
+    return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
 
   @PostMapping
@@ -157,8 +147,8 @@ public class UserApi {
       HttpServletRequest req,
       @ApiParam("lxcName") @PathVariable String lxcName
   ) {
-    String res = lxcService.stopLxcForUser(userService.whoami(req), lxcName);
-    return new ResponseEntity<>(res, HttpStatus.OK);
+    lxcService.stopLxc(userService.whoamiInner(req), lxcName);
+    return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -173,8 +163,7 @@ public class UserApi {
   public ResponseEntity<UserSafeDto> updateUserData(
       @RequestBody UserUpdateDto user,
       @PathVariable String username) {
-    return new ResponseEntity<>(
-        modelMapper.map(userService.update(user, username), UserSafeDto.class), HttpStatus.OK);
+    return new ResponseEntity<>(userService.update(user, username), HttpStatus.OK);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -187,10 +176,9 @@ public class UserApi {
       @ApiResponse(code = 412, message = "Expired or invalid JWT token")
   })
   public ResponseEntity<UserSafeDto> updateUserPassword(
-      @RequestBody PasswordDto passowrdDto,
+      @RequestBody PasswordDto passwordDto,
       @PathVariable String username) {
-    return new ResponseEntity<>(
-        modelMapper.map(userService.updateUserPassword(passowrdDto, username), UserSafeDto.class), HttpStatus.OK);
+    return new ResponseEntity<>(userService.updateUserPassword(passwordDto, username), HttpStatus.OK);
   }
 
   @PreAuthorize("hasRole('ROLE_CLIENT')")
@@ -204,9 +192,9 @@ public class UserApi {
   })
   public ResponseEntity<UserSafeDto> updatePassword(
       HttpServletRequest req,
-      @RequestBody PasswordDto passowrdDto) {
-    return new ResponseEntity<>(modelMapper.map(userService.updateUserPassword(
-            passowrdDto, userService.whoami(req).getUsername()), UserSafeDto.class), HttpStatus.OK);
+      @RequestBody PasswordDto passwordDto) {
+    var user = userService.updateUserPassword(passwordDto, userService.whoamiInner(req));
+    return new ResponseEntity<>(user, HttpStatus.OK);
   }
 
 

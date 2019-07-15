@@ -1,6 +1,7 @@
 package org.lxc.platform.config;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -24,9 +25,9 @@ public class AppConfig {
   }
 
   @Bean
-  public ThreadPoolTaskExecutor taskExecutor() {
+  public ThreadPoolTaskExecutor taskExecutor(@Value("${init.threadPoolSize}") int threadPoolSize) {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    executor.setCorePoolSize(2);
+    executor.setCorePoolSize(threadPoolSize);
     return executor;
   }
 }

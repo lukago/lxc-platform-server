@@ -13,10 +13,14 @@ import org.lxc.platform.respository.UserRepository;
 @Service
 public class MyUserDetails implements UserDetailsService {
 
-  private static final Logger log = LoggerFactory.getLogger(MyUserDetails.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MyUserDetails.class);
+
+  private final UserRepository userRepository;
 
   @Autowired
-  private UserRepository userRepository;
+  public MyUserDetails(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

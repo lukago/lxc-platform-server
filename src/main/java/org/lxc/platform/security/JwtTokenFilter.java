@@ -16,13 +16,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
-public class  JwtTokenFilter extends GenericFilterBean {
+public class JwtTokenFilter extends GenericFilterBean {
 
-  private static Logger log = LoggerFactory.getLogger(JwtTokenFilter.class);
+  private static Logger LOG = LoggerFactory.getLogger(JwtTokenFilter.class);
 
   private JwtTokenProvider jwtTokenProvider;
 
-  public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
+  JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
     this.jwtTokenProvider = jwtTokenProvider;
   }
 
@@ -37,7 +37,7 @@ public class  JwtTokenFilter extends GenericFilterBean {
         SecurityContextHolder.getContext().setAuthentication(auth);
       }
     } catch (HttpException ex) {
-      log.info("Exception in jwt token filter: {}", ex);
+      LOG.info("Exception in jwt token filter: {}", ex);
       HttpServletResponse response = (HttpServletResponse) res;
       response.sendError(ex.getHttpStatus().value(), ex.getMessage());
       return;

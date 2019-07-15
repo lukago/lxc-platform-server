@@ -1,0 +1,22 @@
+version: '2.0'
+
+services:
+  postgresdbtest:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_PASSWORD: lxctest
+      POSTGRES_USER: lxctest
+      POSTGRES_DB: lxcdbtest
+  lxc-platform-server-test:
+    image: lxc-platform-server:latest
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      DEBUG_PORT: 17779
+      LOG_LEVEL: DEBUG
+      LXC_SERVER_PORT: 8085
+      JWT_SECRET: jwttestsecretkey
+      DB_CONT_NAME: postgresdbtest
+      DB_PORT: 5432
+      DB_NAME: lxcdbtest
+      DB_USER: lxctest
+      DB_PASSWORD: lxctest

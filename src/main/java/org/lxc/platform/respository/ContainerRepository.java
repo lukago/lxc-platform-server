@@ -6,7 +6,7 @@ import org.lxc.platform.model.Container;
 import org.lxc.platform.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ContainerRepository extends JpaRepository<Container, Integer> {
+public interface ContainerRepository extends JpaRepository<Container, Long> {
 
   Optional<Container> findByName(String name);
 

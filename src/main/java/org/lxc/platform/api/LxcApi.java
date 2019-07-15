@@ -7,14 +7,16 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
-import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.lxc.platform.dto.ContainerDto;
-import org.lxc.platform.dto.LxcStatusDto;
-import org.lxc.platform.model.Job;
-import org.lxc.platform.service.LxcService;
-import org.modelmapper.ModelMapper;
 import org.lxc.platform.dto.JobDto;
 import org.lxc.platform.dto.LxcCreateDto;
+import org.lxc.platform.dto.LxcStatusDto;
+import org.lxc.platform.dto.ServerInfoDto;
+import org.lxc.platform.model.Role;
+import org.lxc.platform.service.LxcService;
+import org.lxc.platform.service.UserService;
+import org.lxc.platform.service.flow.IProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,25 +33,44 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.EmitterProcessor;
 
 @RestController
 @RequestMapping("/api/lxc")
 @Api(tags = "lxc")
 public class LxcApi {
 
-  private static Logger log = LoggerFactory.getLogger(LxcApi.class);
+  private static Logger LOG = LoggerFactory.getLogger(LxcApi.class);
+
+  private final LxcService lxcService;
+  private final UserService userService;
+  private final SimpMessagingTemplate template;
+  private final IProcessor<JobDto> processor;
+  private final Gson gson;
 
   @Autowired
-  LxcService lxcService;
+  public LxcApi(LxcService lxcService,
+      UserService userService,
+      SimpMessagingTemplate template,
+      IProcessor<JobDto> processor) {
+    this.lxcService = lxcService;
+    this.userService = userService;
+    this.template = template;
+    this.processor = processor;
+    this.gson = new Gson();
 
-  @Autowired
-  private SimpMessagingTemplate template;
+    this.processor.subscribe(job -> {
+      var jobJson = this.gson.toJson(job);
+      LOG.info("LXC: {}", jobJson);
 
-  @Autowired
-  private ModelMapper modelMapper;
+      if (!job.getCreatedBy().getRoles().contains(Role.ROLE_ADMIN)) {
+        this.template.convertAndSendToUser(job.getCreatedBy().getUsername(), "/sc/topic/jobs", jobJson);
+      }
 
-  private Gson gson = new Gson();
+      userService.getAllAdmins().forEach(admin -> {
+        this.template.convertAndSendToUser(admin.getUsername(), "/sc/topic/jobs", jobJson);
+      });
+    });
+  }
 
   @PostMapping
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -57,19 +78,13 @@ public class LxcApi {
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
   })
-  public ResponseEntity<Void> createLxc(@ApiParam("lxcCreateDto") @RequestBody LxcCreateDto lxcCreateDto) {
-    EmitterProcessor<Job> processor = EmitterProcessor.create();
-
-    processor.subscribe(job -> {
-      String jobJson = gson.toJson(modelMapper.map(job, JobDto.class));
-      log.info("LXC: {}", jobJson);
-      template.convertAndSend("/sc/topic/jobs", jobJson);
-    });
-
+  public ResponseEntity<Void> createLxc(
+      HttpServletRequest req,
+      @ApiParam("lxcCreateDto") @RequestBody LxcCreateDto lxcCreateDto) {
     lxcService.create(
+        userService.whoamiInner(req),
         lxcCreateDto.getName(),
-        Integer.valueOf(lxcCreateDto.getPort()),
-        processor
+        Integer.valueOf(lxcCreateDto.getPort())
     );
 
     return new ResponseEntity<>(HttpStatus.ACCEPTED);
@@ -111,11 +126,7 @@ public class LxcApi {
       @ApiResponse(code = 400, message = "Something went wrong"),
   })
   public ResponseEntity<List<ContainerDto>> getLxcs() {
-    var containers = lxcService.getAllContainers()
-        .stream()
-        .map(cont -> modelMapper.map(cont, ContainerDto.class))
-        .collect(Collectors.toList());
-
+    var containers = lxcService.getAllContainers();
     return new ResponseEntity<>(containers, HttpStatus.OK);
   }
 
@@ -127,10 +138,11 @@ public class LxcApi {
   })
   @RequestMapping("/{lxcName}/start")
   public ResponseEntity<String> startLxc(
+      HttpServletRequest req,
       @ApiParam("lxcName") @PathVariable String lxcName
   ) {
-    String res = lxcService.startLxc(lxcName);
-    return new ResponseEntity<>(res, HttpStatus.OK);
+    lxcService.startLxcAdmin(userService.whoamiInner(req), lxcName);
+    return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
 
   @PostMapping
@@ -141,10 +153,11 @@ public class LxcApi {
   })
   @RequestMapping("/{lxcName}/stop")
   public ResponseEntity<String> stopLxc(
+      HttpServletRequest req,
       @ApiParam("lxcName") @PathVariable String lxcName
   ) {
-    String res = lxcService.stopLxc(lxcName);
-    return new ResponseEntity<>(res, HttpStatus.OK);
+    lxcService.stopLxcAdmin(userService.whoamiInner(req), lxcName);
+    return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
 
   @GetMapping(value = "/{lxcName}/status")
@@ -155,15 +168,29 @@ public class LxcApi {
       @ApiResponse(code = 403, message = "Access denied"),
       @ApiResponse(code = 500, message = "Expired or invalid JWT token")
   })
-  public ResponseEntity<LxcStatusDto> getLxcStatus(@PathVariable String lxcName) {
-    LxcStatusDto statusDto = modelMapper.map(lxcService.getLxcStatus(lxcName), LxcStatusDto.class);
-    return new ResponseEntity<>(statusDto, HttpStatus.OK);
+  public ResponseEntity<LxcStatusDto> getLxcStatus(
+      HttpServletRequest req,
+      @PathVariable String lxcName) {
+    lxcService.getLxcStatusAdmin(userService.whoamiInner(req), lxcName);
+    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+  }
+
+  @GetMapping(value = "/server")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
+  @ApiOperation(value = "", response = String.class)
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Something went wrong"),
+      @ApiResponse(code = 403, message = "Access denied"),
+      @ApiResponse(code = 500, message = "Expired or invalid JWT token")
+  })
+  public ResponseEntity<ServerInfoDto> getServerInfo() {
+    return new ResponseEntity<>(lxcService.getServerInfo(), HttpStatus.OK);
   }
 
   @MessageMapping("sc/jobs")
   @SendTo("/sc/topic/jobs")
   public String jobMessage(String msg) {
-    log.info("Socket jobMessage: {}", msg);
+    LOG.info("Socket jobMessage: {}", msg);
     return msg;
   }
 }

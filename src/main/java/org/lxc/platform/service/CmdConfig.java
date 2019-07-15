@@ -6,43 +6,43 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CmdConfig implements ICmdConfig {
-  @Value("${ssh.server.ip}")
+  @Value("${ssh.server.ip:@null}")
   private String serverIp;
 
-  @Value("${ssh.server.port}")
+  @Value("${ssh.server.port:@null}")
   private String serverPort;
 
-  @Value("${ssh.server.key}")
+  @Value("${ssh.server.key:@null}")
   private String key;
 
-  @Value("${ssh.server.username}")
+  @Value("${ssh.server.username:@null}")
   private String username;
 
-  @Value("${ssh.server.password}")
+  @Value("${ssh.server.password:@null}")
   private String password;
 
-  @Value("${ssh.server.parentName}")
+  @Value("${ssh.server.parentName:@null}")
   private String parentName;
 
-  @Value("${ssh.lxc.port}")
+  @Value("${ssh.lxc.port:@null}")
   private String lxcPort;
 
-  @Value("${lxc.cmdRunner}")
+  @Value("${lxc.cmdRunner:@null}")
   private String cmdRunnerQualifier;
 
-  @Value("${lxc.copy}")
+  @Value("${lxc.copy:@null}")
   private String copyCmd;
 
-  @Value("${lxc.start}")
+  @Value("${lxc.start:@null}")
   private String startCmd;
 
-  @Value("${lxc.stop}")
+  @Value("${lxc.stop:@null}")
   private String stopCmd;
 
-  @Value("${lxc.info}")
+  @Value("${lxc.info:@null}")
   private String infoCmd;
 
-  @Value("${lxc.routing}")
+  @Value("${lxc.routing:@null}")
   private String routingCmd;
 
   public String getServerIp() {

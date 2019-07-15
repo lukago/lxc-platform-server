@@ -1,7 +1,8 @@
 package org.lxc.platform.service.job;
 
-import org.lxc.platform.model.Job;
+import org.lxc.platform.dto.JobDto;
 
-public interface JobTask extends Runnable {
-  Job getJob();
+public interface JobTask<T> {
+  JobDto getJob();
+  T run();
 }
