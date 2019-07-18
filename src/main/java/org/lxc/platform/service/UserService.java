@@ -121,6 +121,11 @@ public class UserService {
     return modelMapper.map(userRepository.save(userDb), UserSafeDto.class);
   }
 
+  public UserSafeDto updateMe(UserUpdateDto user, User me) {
+    me.setEmail(user.getEmail());
+    return modelMapper.map(userRepository.save(me), UserSafeDto.class);
+  }
+
   public UserSafeDto updateUserPassword(PasswordDto passwordDto, User userDb) {
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
         userDb.getUsername(), passwordDto.getOldPassword()));

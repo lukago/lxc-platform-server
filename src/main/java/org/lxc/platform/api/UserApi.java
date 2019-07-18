@@ -83,7 +83,7 @@ public class UserApi {
   }
 
   @GetMapping(value = "/me")
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
   @ApiOperation(value = "", response = UserSafeDto.class)
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
@@ -95,7 +95,7 @@ public class UserApi {
   }
 
   @GetMapping(value = "/me/lxc")
-  @PreAuthorize("hasRole('ROLE_CLIENT')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
   @ApiOperation(value = "", response = List.class)
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
@@ -108,7 +108,7 @@ public class UserApi {
   }
 
   @GetMapping(value = "/me/lxc/{lxcName}/status")
-  @PreAuthorize("hasRole('ROLE_CLIENT')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
   @ApiOperation(value = "", response = List.class)
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
@@ -122,7 +122,7 @@ public class UserApi {
   }
 
   @PostMapping
-  @PreAuthorize("hasRole('ROLE_CLIENT')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
   @ApiOperation(value = "")
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
@@ -137,7 +137,7 @@ public class UserApi {
   }
 
   @PostMapping
-  @PreAuthorize("hasRole('ROLE_CLIENT')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
   @ApiOperation(value = "")
   @ApiResponses(value = {
       @ApiResponse(code = 400, message = "Something went wrong"),
@@ -166,6 +166,21 @@ public class UserApi {
     return new ResponseEntity<>(userService.update(user, username), HttpStatus.OK);
   }
 
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
+  @PostMapping("/me")
+  @ApiOperation(value = "")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Something went wrong"),
+      @ApiResponse(code = 403, message = "Access denied"),
+      @ApiResponse(code = 422, message = "Username is already in use"),
+      @ApiResponse(code = 412, message = "Expired or invalid JWT token")
+  })
+  public ResponseEntity<UserSafeDto> updateMe(
+      HttpServletRequest req,
+      @RequestBody UserUpdateDto user) {
+    return new ResponseEntity<>(userService.updateMe(user, userService.whoamiInner(req)), HttpStatus.OK);
+  }
+
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/{username}/pwd")
   @ApiOperation(value = "")
@@ -181,7 +196,7 @@ public class UserApi {
     return new ResponseEntity<>(userService.updateUserPassword(passwordDto, username), HttpStatus.OK);
   }
 
-  @PreAuthorize("hasRole('ROLE_CLIENT')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
   @PostMapping("me/pwd")
   @ApiOperation(value = "")
   @ApiResponses(value = {
