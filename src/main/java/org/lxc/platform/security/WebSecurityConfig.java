@@ -29,8 +29,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     // No session will be created or used by spring security
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
+    // https
+    http.requiresChannel().anyRequest().requiresSecure();
+
     // Entry points
-    http.csrf().disable().cors().and().authorizeRequests()
+    http.csrf().and().authorizeRequests()
         .antMatchers("/api/auth/signin").permitAll()
         .antMatchers("/actuator/health").permitAll()
         .antMatchers("/api/**").authenticated();

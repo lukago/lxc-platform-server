@@ -21,6 +21,9 @@ public class UserDto {
   @ApiModelProperty
   private String passwordRetype;
 
+  @ApiModelProperty
+  private String version;
+
   public String getUsername() {
     return username;
   }
@@ -59,5 +62,13 @@ public class UserDto {
 
   public void setPasswordRetype(String passwordRetype) {
     this.passwordRetype = passwordRetype;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 }

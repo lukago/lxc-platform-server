@@ -37,7 +37,11 @@ services:
       DB_NAME: lxcdb
       DB_USER: postgresuser
       DB_PASSWORD: postgrespwd
-      LXC_SERVER_PORT: 8081
+      LXC_SERVER_PORT: 8443
+      SSL_KEY_ALIAS: lxc-key
+      SSL_KEY_STORE: classpath:lxc-keystore.p12
+      SSL_KEY_STORE_TYPE: PKCS12
+      SSL_KEY_STORE_PASSWORD: password
       JWT_SECRET: jwtsupersecretkey
       WEBUI_URL: http://localhost:3003
       SSH_SERVER_IP: 192.168.144.4
@@ -48,5 +52,5 @@ services:
       SSH_SERVER_LXC_PARENT: climbing-stinkbug
       SSH_LXC_PORT: 22
     ports:
-      - "8081:8081"
+      - "8443:8443"
       - "7779:7779"

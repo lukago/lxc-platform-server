@@ -14,6 +14,7 @@ import org.lxc.platform.dto.UserSafeDto;
 import org.lxc.platform.dto.UserUpdateDto;
 import org.lxc.platform.service.LxcService;
 import org.lxc.platform.service.UserService;
+import org.lxc.platform.service.VersionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +34,13 @@ public class UserApi {
 
   private final UserService userService;
   private final LxcService lxcService;
+  private final VersionService versionService;
 
   @Autowired
-  public UserApi(UserService userService, LxcService lxcService) {
+  public UserApi(UserService userService, LxcService lxcService, VersionService versionService) {
     this.userService = userService;
     this.lxcService = lxcService;
+    this.versionService = versionService;
   }
 
   @GetMapping(value = "")
@@ -63,8 +66,9 @@ public class UserApi {
       @ApiResponse(code = 404, message = "The user doesn't exist"),
       @ApiResponse(code = 412, message = "Expired or invalid JWT token")
   })
-  public ResponseEntity<String> delete(@ApiParam("Username") @PathVariable String username) {
-    userService.delete(username);
+  public ResponseEntity<String> delete(@ApiParam("Username") @PathVariable String username,
+          HttpServletRequest req) {
+    userService.delete(username, versionService.extractVersion(req));
     return new ResponseEntity<>(username, HttpStatus.OK);
   }
 
@@ -162,8 +166,9 @@ public class UserApi {
   })
   public ResponseEntity<UserSafeDto> updateUserData(
       @RequestBody UserUpdateDto user,
-      @PathVariable String username) {
-    return new ResponseEntity<>(userService.update(user, username), HttpStatus.OK);
+      @PathVariable String username,
+      HttpServletRequest req) {
+    return new ResponseEntity<>(userService.update(user, username, versionService.extractVersion(req)), HttpStatus.OK);
   }
 
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
@@ -178,7 +183,8 @@ public class UserApi {
   public ResponseEntity<UserSafeDto> updateMe(
       HttpServletRequest req,
       @RequestBody UserUpdateDto user) {
-    return new ResponseEntity<>(userService.updateMe(user, userService.whoamiInner(req)), HttpStatus.OK);
+    return new ResponseEntity<>(userService.updateMe(
+            user, userService.whoamiInner(req), versionService.extractVersion(req)), HttpStatus.OK);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -192,8 +198,10 @@ public class UserApi {
   })
   public ResponseEntity<UserSafeDto> updateUserPassword(
       @RequestBody PasswordDto passwordDto,
-      @PathVariable String username) {
-    return new ResponseEntity<>(userService.updateUserPassword(passwordDto, username), HttpStatus.OK);
+      @PathVariable String username,
+      HttpServletRequest req) {
+    return new ResponseEntity<>(userService.updateUserPassword(
+            passwordDto, username, versionService.extractVersion(req)), HttpStatus.OK);
   }
 
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
@@ -208,7 +216,8 @@ public class UserApi {
   public ResponseEntity<UserSafeDto> updatePassword(
       HttpServletRequest req,
       @RequestBody PasswordDto passwordDto) {
-    var user = userService.updateUserPassword(passwordDto, userService.whoamiInner(req));
+    var user = userService.updateUserPassword(passwordDto, userService.whoamiInner(req),
+            versionService.extractVersion(req));
     return new ResponseEntity<>(user, HttpStatus.OK);
   }
 

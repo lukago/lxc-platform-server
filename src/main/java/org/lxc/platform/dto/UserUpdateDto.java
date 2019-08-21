@@ -12,6 +12,9 @@ public class UserUpdateDto {
   @ApiModelProperty
   private List<Role> roles;
 
+  @ApiModelProperty
+  private String version;
+
   public String getEmail() {
     return email;
   }
@@ -26,5 +29,13 @@ public class UserUpdateDto {
 
   public void setRoles(List<Role> roles) {
     this.roles = roles;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 }

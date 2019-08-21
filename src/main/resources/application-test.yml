@@ -27,6 +27,11 @@ management:
 
 server:
   port: ${LXC_SERVER_PORT}
+  ssl:
+    key-alias: ${SSL_KEY_ALIAS}
+    key-store: ${SSL_KEY_STORE}
+    key-store-type: ${SSL_KEY_STORE_TYPE}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD}
 
 logging:
   level:

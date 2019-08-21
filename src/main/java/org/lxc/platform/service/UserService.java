@@ -35,16 +35,18 @@ public class UserService {
   private final JwtTokenProvider jwtTokenProvider;
   private final AuthenticationManager authenticationManager;
   private final ModelMapper modelMapper;
+  private final VersionService versionService;
 
   @Autowired
   public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-      JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager,
-      ModelMapper modelMapper) {
+          JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager,
+          ModelMapper modelMapper, VersionService versionService) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtTokenProvider = jwtTokenProvider;
     this.authenticationManager = authenticationManager;
     this.modelMapper = modelMapper;
+    this.versionService = versionService;
   }
 
   public String signin(String username, String password) {
@@ -78,7 +80,8 @@ public class UserService {
   }
 
   @Transactional
-  public void delete(String username) {
+  public void delete(String username, Long version) {
+    versionService.validateVersion(getUserInner(username), version);
     userRepository.deleteByUsername(username);
   }
 
@@ -111,22 +114,24 @@ public class UserService {
         .collect(Collectors.toList());
   }
 
-  public UserSafeDto update(UserUpdateDto user, String username) {
-    User userDb = userRepository
-        .findByUsername(username)
-        .orElseThrow(() -> new HttpException("Username not found", HttpStatus.NOT_FOUND));
+  public UserSafeDto update(UserUpdateDto user, String username, Long version) {
+    User userDb = getUserInner(username);
+    versionService.validateVersion(userDb, version);
 
     userDb.setEmail(user.getEmail());
     userDb.setRoles(user.getRoles());
     return modelMapper.map(userRepository.save(userDb), UserSafeDto.class);
   }
 
-  public UserSafeDto updateMe(UserUpdateDto user, User me) {
+  public UserSafeDto updateMe(UserUpdateDto user, User me, Long version) {
+    versionService.validateVersion(me, version);
     me.setEmail(user.getEmail());
     return modelMapper.map(userRepository.save(me), UserSafeDto.class);
   }
 
-  public UserSafeDto updateUserPassword(PasswordDto passwordDto, User userDb) {
+  public UserSafeDto updateUserPassword(PasswordDto passwordDto, User userDb, Long version) {
+    versionService.validateVersion(userDb, version);
+
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
         userDb.getUsername(), passwordDto.getOldPassword()));
 
@@ -138,11 +143,17 @@ public class UserService {
     return modelMapper.map(userRepository.save(userDb), UserSafeDto.class);
   }
 
-  public UserSafeDto updateUserPassword(PasswordDto passwordDto, String username) {
+  public UserSafeDto updateUserPassword(PasswordDto passwordDto, String username, Long version) {
     User userDb = userRepository
         .findByUsername(username)
         .orElseThrow(() -> new HttpException("Username not found", HttpStatus.NOT_FOUND));
 
-    return updateUserPassword(passwordDto, userDb);
+    return updateUserPassword(passwordDto, userDb, version);
+  }
+
+  private User getUserInner(String username) {
+    return userRepository
+            .findByUsername(username)
+            .orElseThrow(() -> new HttpException("The user doesn't exist", HttpStatus.NOT_FOUND));
   }
 }

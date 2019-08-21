@@ -15,6 +15,9 @@ public class UserSafeDto {
   @ApiModelProperty
   private List<Role> roles;
 
+  @ApiModelProperty
+  private String version;
+
   public String getUsername() {
     return username;
   }
@@ -37,5 +40,13 @@ public class UserSafeDto {
 
   public void setRoles(List<Role> roles) {
     this.roles = roles;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 }
