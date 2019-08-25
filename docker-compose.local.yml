@@ -16,7 +16,7 @@ services:
       POSTGRES_USER: postgresuser
       POSTGRES_DB: lxcdb
     volumes:
-      - /var/lxcdata/db:/var/lib/postgresql/data:rw
+      - ~/.lxc-platform-db:/var/lib/postgresql/data:rw
     ports:
       - "5432:5432"
 
@@ -43,7 +43,7 @@ services:
       SSL_KEY_STORE_TYPE: PKCS12
       SSL_KEY_STORE_PASSWORD: password
       JWT_SECRET: jwtsupersecretkey
-      WEBUI_URL: http://localhost:3003
+      WEBUI_URL: https://localhost:3003
       SSH_SERVER_IP: 192.168.144.4
       SSH_SERVER_PORT: 22
       SSH_SERVER_KEY: admin.key
