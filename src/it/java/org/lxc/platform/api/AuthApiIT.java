@@ -19,7 +19,7 @@ class AuthApiIT extends AbstractTest {
   @Test
   void healthCheck() throws Exception {
     HttpRequest request = HttpRequest.newBuilder()
-        .uri(URI.create("http://" +
+        .uri(URI.create("https://" +
             SERVER_CONTAINER.getServiceHost(SERVER_NAME, SERVER_PORT) +
             ":" +
             SERVER_CONTAINER.getServicePort(SERVER_NAME, SERVER_PORT) +

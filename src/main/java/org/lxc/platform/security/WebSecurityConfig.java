@@ -33,7 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     http.requiresChannel().anyRequest().requiresSecure();
 
     // Entry points
-    http.csrf().disable().authorizeRequests()
+    http.csrf().disable().cors().and().authorizeRequests()
         .antMatchers("/api/auth/signin").permitAll()
         .antMatchers("/actuator/health").permitAll()
         .antMatchers("/api/**").authenticated();

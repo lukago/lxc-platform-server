@@ -43,7 +43,7 @@ security:
   jwt:
     token:
       secretKey: ${JWT_SECRET}
-      expireLength: 36000
+      expireLength: 3600000
 
 cors:
   allowedOrigins: '*'
