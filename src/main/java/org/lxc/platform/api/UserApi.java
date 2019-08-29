@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.lxc.platform.dto.ContainerDto;
 import org.lxc.platform.dto.LxcStatusDto;
 import org.lxc.platform.dto.PasswordDto;
+import org.lxc.platform.dto.PasswordForceDto;
 import org.lxc.platform.dto.UserSafeDto;
 import org.lxc.platform.dto.UserUpdateDto;
 import org.lxc.platform.service.LxcService;
@@ -197,10 +198,10 @@ public class UserApi {
       @ApiResponse(code = 412, message = "Expired or invalid JWT token")
   })
   public ResponseEntity<UserSafeDto> updateUserPassword(
-      @RequestBody PasswordDto passwordDto,
+      @RequestBody PasswordForceDto passwordDto,
       @PathVariable String username,
       HttpServletRequest req) {
-    return new ResponseEntity<>(userService.updateUserPassword(
+    return new ResponseEntity<>(userService.updateUserForcePassword(
             passwordDto, username, versionService.extractVersion(req)), HttpStatus.OK);
   }
 

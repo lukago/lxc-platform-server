@@ -3,15 +3,16 @@ package org.lxc.platform.service;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-
 import javax.transaction.Transactional;
-import org.lxc.platform.dto.UserSafeDto;
-import org.lxc.platform.model.Role;
-import org.lxc.platform.model.User;
 import org.lxc.platform.dto.PasswordDto;
+import org.lxc.platform.dto.PasswordForceDto;
 import org.lxc.platform.dto.UserDto;
+import org.lxc.platform.dto.UserSafeDto;
 import org.lxc.platform.dto.UserUpdateDto;
 import org.lxc.platform.exception.HttpException;
+import org.lxc.platform.model.Role;
+import org.lxc.platform.model.User;
+import org.lxc.platform.respository.UserRepository;
 import org.lxc.platform.security.JwtTokenProvider;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -23,7 +24,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.lxc.platform.respository.UserRepository;
 
 @Service
 public class UserService {
@@ -143,12 +143,19 @@ public class UserService {
     return modelMapper.map(userRepository.save(userDb), UserSafeDto.class);
   }
 
-  public UserSafeDto updateUserPassword(PasswordDto passwordDto, String username, Long version) {
+  public UserSafeDto updateUserForcePassword(PasswordForceDto passwordDto, String username, Long version) {
     User userDb = userRepository
         .findByUsername(username)
         .orElseThrow(() -> new HttpException("Username not found", HttpStatus.NOT_FOUND));
 
-    return updateUserPassword(passwordDto, userDb, version);
+    versionService.validateVersion(userDb, version);
+
+    if (!passwordDto.getPassword().equals(passwordDto.getPasswordRetype())) {
+      throw new HttpException("Passwords do not match", HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    userDb.setPassword(passwordEncoder.encode(passwordDto.getPassword()));
+    return modelMapper.map(userRepository.save(userDb), UserSafeDto.class);
   }
 
   private User getUserInner(String username) {
