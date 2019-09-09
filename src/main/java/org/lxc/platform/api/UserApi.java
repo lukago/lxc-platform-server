@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Pattern;
 import org.lxc.platform.dto.ContainerDto;
 import org.lxc.platform.dto.LxcStatusDto;
 import org.lxc.platform.dto.PasswordDto;
@@ -120,7 +121,8 @@ public class UserApi {
       @ApiResponse(code = 403, message = "Access denied"),
       @ApiResponse(code = 500, message = "Expired or invalid JWT token")
   })
-  public ResponseEntity<LxcStatusDto> getLxcStatus(HttpServletRequest req, @PathVariable String lxcName) {
+  public ResponseEntity<LxcStatusDto> getLxcStatus(HttpServletRequest req,
+      @PathVariable @Pattern(regexp = "^[A-Za-z0-9]+$") String lxcName) {
 
     lxcService.getLxcStatus(userService.whoamiInner(req), lxcName);
     return new ResponseEntity<>(HttpStatus.ACCEPTED);
@@ -135,7 +137,7 @@ public class UserApi {
   @RequestMapping("/me/lxc/{lxcName}/start")
   public ResponseEntity<String> startLxc(
       HttpServletRequest req,
-      @ApiParam("lxcName") @PathVariable String lxcName
+      @ApiParam("lxcName") @PathVariable @Pattern(regexp = "^[A-Za-z0-9]+$") String lxcName
   ) {
     lxcService.startLxc(userService.whoamiInner(req), lxcName);
     return new ResponseEntity<>(HttpStatus.ACCEPTED);
@@ -150,7 +152,7 @@ public class UserApi {
   @RequestMapping("/me/lxc/{lxcName}/stop")
   public ResponseEntity<String> stopLxc(
       HttpServletRequest req,
-      @ApiParam("lxcName") @PathVariable String lxcName
+      @ApiParam("lxcName") @PathVariable @Pattern(regexp = "^[A-Za-z0-9]+$") String lxcName
   ) {
     lxcService.stopLxc(userService.whoamiInner(req), lxcName);
     return new ResponseEntity<>(HttpStatus.ACCEPTED);

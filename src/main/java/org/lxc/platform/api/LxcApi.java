@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import org.lxc.platform.dto.ContainerDto;
 import org.lxc.platform.dto.JobDto;
 import org.lxc.platform.dto.LxcCreateDto;
@@ -80,7 +82,7 @@ public class LxcApi {
   })
   public ResponseEntity<Void> createLxc(
       HttpServletRequest req,
-      @ApiParam("lxcCreateDto") @RequestBody LxcCreateDto lxcCreateDto) {
+      @ApiParam("lxcCreateDto") @RequestBody @Valid LxcCreateDto lxcCreateDto) {
     lxcService.create(
         userService.whoamiInner(req),
         lxcCreateDto.getName(),
@@ -98,7 +100,7 @@ public class LxcApi {
   })
   @RequestMapping("/{lxcName}/assign")
   public ResponseEntity<Void> assignLxcToUser(
-      @ApiParam("lxcName") @PathVariable String lxcName,
+      @ApiParam("lxcName") @PathVariable @Pattern(regexp = "^[A-Za-z0-9]+$") String lxcName,
       @ApiParam("username") @RequestParam  String username
   ) {
     lxcService.assignUserToLxc(lxcName, username);
@@ -113,7 +115,7 @@ public class LxcApi {
   })
   @RequestMapping("/{lxcName}/unassign")
   public ResponseEntity<Void> unassingLxcFromUser(
-      @ApiParam("lxcName") @PathVariable String lxcName
+      @ApiParam("lxcName") @PathVariable @Pattern(regexp = "^[A-Za-z0-9]+$") String lxcName
   ) {
     lxcService.unassignLxcFromUser(lxcName);
     return new ResponseEntity<>(HttpStatus.OK);
@@ -139,7 +141,7 @@ public class LxcApi {
   @RequestMapping("/{lxcName}/start")
   public ResponseEntity<String> startLxc(
       HttpServletRequest req,
-      @ApiParam("lxcName") @PathVariable String lxcName
+      @ApiParam("lxcName") @PathVariable @Pattern(regexp = "^[A-Za-z0-9]+$") String lxcName
   ) {
     lxcService.startLxcAdmin(userService.whoamiInner(req), lxcName);
     return new ResponseEntity<>(HttpStatus.ACCEPTED);
@@ -154,7 +156,7 @@ public class LxcApi {
   @RequestMapping("/{lxcName}/stop")
   public ResponseEntity<String> stopLxc(
       HttpServletRequest req,
-      @ApiParam("lxcName") @PathVariable String lxcName
+      @ApiParam("lxcName") @PathVariable @Pattern(regexp = "^[A-Za-z0-9]+$") String lxcName
   ) {
     lxcService.stopLxcAdmin(userService.whoamiInner(req), lxcName);
     return new ResponseEntity<>(HttpStatus.ACCEPTED);
@@ -170,7 +172,7 @@ public class LxcApi {
   })
   public ResponseEntity<LxcStatusDto> getLxcStatus(
       HttpServletRequest req,
-      @PathVariable String lxcName) {
+      @PathVariable @Pattern(regexp = "^[A-Za-z0-9]+$") String lxcName) {
     lxcService.getLxcStatusAdmin(userService.whoamiInner(req), lxcName);
     return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
