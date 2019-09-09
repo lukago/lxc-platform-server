@@ -2,6 +2,7 @@ package org.lxc.platform.model;
 
 import com.google.common.base.Objects;
 
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,7 +11,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
 @MappedSuperclass
-public abstract class BaseModel {
+public abstract class BaseModel implements Serializable {
 
     @Id
     @Column(nullable = false, updatable = false)

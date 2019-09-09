@@ -1,29 +1,36 @@
 package org.lxc.platform.model;
 
 import com.google.common.base.Objects;
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 
 @Entity
 @Table(name="table_users")
-public class User extends BaseModel {
+public class User extends BaseModel implements Serializable {
 
   @ElementCollection(fetch = FetchType.EAGER)
   private List<Role> roles;
 
+  @NotNull
   @Size(min = 4, max = 255, message = "Minimum username length: 4 characters")
   @Column(unique = true, nullable = false)
   private String username;
 
+  @NotNull
+  @Email
   @Column(unique = true, nullable = false)
   private String email;
 
+  @NotNull
   @Size(min = 8, message = "Minimum password length: 8 characters")
   private String password;
 
